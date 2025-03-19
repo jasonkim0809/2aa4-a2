@@ -9,10 +9,10 @@ public class Runner {
     public static void main(String[] args) {
         String filename = args[0];
         try {
-            run(Explorer.class)
+            run(Explorer.class) // each tile is a 4x4 square?????
                     .exploring(new File(filename))
                     .withSeed(42L)
-                    .startingAt(12, 12, "EAST")
+                    .startingAt(4, 4, "EAST")
                     .backBefore(7000)
                     .withCrew(5)
                     .collecting(1000, "WOOD")

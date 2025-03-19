@@ -39,27 +39,27 @@ public class Explorer implements IExplorerRaid {
         JSONObject decision = new JSONObject();
         JSONObject parameter = new JSONObject();
 
-        if (counter == 0){
-            decision.put("action","scan");
-            counter++;
-        }
-        else if (counter == 1){
-            parameter.put("direction","E");
-            decision.put("parameters",parameter);
-            decision.put("action","heading");
-            counter++;
-        }
-        else if (counter == 2){
-            decision.put("action","scan");
-            counter++;
-        }
-        else{
-            decision.put("action","stop");
-        }
+        // if (counter == 0){
+        //     decision.put("action","scan");
+        //     counter++;
+        // }
+        // else if (counter == 1){
+        //     parameter.put("direction","E");
+        //     decision.put("parameters",parameter);
+        //     decision.put("action","heading");
+        //     counter++;
+        // }
+        // else if (counter == 2){
+        //     decision.put("action","scan");
+        //     counter++;
+        // }
+        // else{
+        //     decision.put("action","stop");
+        // }
 
-        // parameter.put("direction","E");
-        // decision.put("action","echo");
-        // decision.put("parameters",parameter);
+        parameter.put("direction","N");
+        decision.put("action","echo");
+        decision.put("parameters",parameter);
     
 
         //decision.put("action", "scan");

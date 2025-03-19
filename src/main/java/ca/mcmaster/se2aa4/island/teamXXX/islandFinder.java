@@ -20,6 +20,8 @@ public class islandFinder {
     private echoResults forwardEcho = null;
     private boolean echoComplete = false;
 
+    private boolean landFound = false;
+
 
     public islandFinder(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
@@ -60,6 +62,7 @@ public class islandFinder {
             }
             decision.put("parameters",parameters);
             decision.put("action","echo");
+            return decision;
         }
         else{
             if (isGround(leftEcho) || isGround(forwardEcho) || isGround(rightEcho)){ // ground detected in at least ONE of these
@@ -100,9 +103,18 @@ public class islandFinder {
             }
             else{ // no ground detected ANYWHERE!!!
                 
+
+
+                // reset echo conditions
+                echoComplete = false;
+                echoDirection = direction.turn_left();
+                leftEcho = null;
+                forwardEcho = null;
+                rightEcho = null;
+
+                return decision;
             }
         }
-        return decision;
     }
 
     public void updateEchoResults(JSONObject results){
