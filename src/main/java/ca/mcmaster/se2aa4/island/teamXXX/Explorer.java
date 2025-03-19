@@ -12,6 +12,7 @@ import eu.ace_design.island.bot.IExplorerRaid;
 
 public class Explorer implements IExplorerRaid {
     private Drone drone;
+    private islandFinder islandF;
 
     private final Logger logger = LogManager.getLogger();
 
@@ -25,19 +26,43 @@ public class Explorer implements IExplorerRaid {
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
 
+        
+        //test stuff for island finder
+        //islandF = new islandFinder(s);
     }
 
+
+    static int counter = 0;
     @Override
     public String takeDecision() { // dependent on what phase of searching the drone is in
-        String next_decision = drone.getDecision();
 
         JSONObject decision = new JSONObject();
+        JSONObject parameter = new JSONObject();
 
-        
-        //decision.put("action",next_decision)
+        // if (counter == 0){
+        //     decision.put("action","scan");
+        //     counter++;
+        // }
+        // else if (counter == 1){
+        //     parameter.put("direction","E");
+        //     decision.put("parameters",parameter);
+        //     decision.put("action","heading");
+        //     counter++;
+        // }
+        // else if (counter == 2){
+        //     decision.put("action","scan");
+        //     counter++;
+        // }
+        // else{
+        //     decision.put("action","stop");
+        // }
 
+        parameter.put("direction","N");
+        decision.put("action","echo");
+        decision.put("parameters",parameter);
+    
 
-        decision.put("action", "stop");
+        //decision.put("action", "scan");
 
         logger.info("** Decision: {}",decision.toString());
         return decision.toString();
@@ -58,7 +83,8 @@ public class Explorer implements IExplorerRaid {
         JSONObject extraInfo = response.getJSONObject("extras");
         logger.info("Additional information received: {}", extraInfo);
 
-        drone.getResults(response);
+        //islandF.updateEchoResults(response);
+        //drone.getResults(response);
     }
 
     @Override
