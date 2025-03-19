@@ -65,10 +65,4 @@ public class Explorer implements IExplorerRaid {
     public String deliverFinalReport() {
         return "no creek found";
     }
-
-}
-
-class Drone {
-    private int battery;
-
 }
