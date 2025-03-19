@@ -28,13 +28,13 @@ public class Explorer implements IExplorerRaid {
     }
 
     @Override
-    public String takeDecision() {
+    public String takeDecision() { // dependent on what phase of searching the drone is in
         String next_decision = drone.getDecision();
 
         JSONObject decision = new JSONObject();
 
         
-
+        //decision.put("action",next_decision)
 
 
         decision.put("action", "stop");

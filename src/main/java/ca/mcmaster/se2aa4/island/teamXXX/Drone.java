@@ -17,4 +17,8 @@ public class Drone {
     public void getResults(JSONObject in){
 
     }
+    public void echo(String echoDirection){
+
+        // echo logic here
+    }
 }
