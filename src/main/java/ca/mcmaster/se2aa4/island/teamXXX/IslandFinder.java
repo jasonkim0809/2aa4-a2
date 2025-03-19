@@ -9,7 +9,7 @@ import org.json.JSONTokener;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 
-public class islandFinder {
+public class IslandFinder {
     private final Logger logger = LogManager.getLogger();
     private Directions direction;
 
@@ -23,7 +23,7 @@ public class islandFinder {
     private boolean landFound = false;
 
 
-    public islandFinder(String s){
+    public IslandFinder(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         String init_heading = info.getString("heading");
         direction = Directions.fromString(init_heading);
@@ -102,7 +102,7 @@ public class islandFinder {
                 return decision;
             }
             else{ // no ground detected ANYWHERE!!!
-                
+
 
 
                 // reset echo conditions

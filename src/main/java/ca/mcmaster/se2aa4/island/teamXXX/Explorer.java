@@ -12,7 +12,7 @@ import eu.ace_design.island.bot.IExplorerRaid;
 
 public class Explorer implements IExplorerRaid {
     private Drone drone;
-    private islandFinder islandF;
+    private IslandFinder islandF;
 
     private final Logger logger = LogManager.getLogger();
 
