@@ -11,6 +11,7 @@ import eu.ace_design.island.bot.IExplorerRaid;
 
 
 public class Explorer implements IExplorerRaid {
+    private Drone drone;
 
     private final Logger logger = LogManager.getLogger();
 
@@ -26,32 +27,17 @@ public class Explorer implements IExplorerRaid {
 
     }
 
-
-    static int fart = 0;
     @Override
     public String takeDecision() {
+        String next_decision = drone.getDecision();
 
         JSONObject decision = new JSONObject();
-        
-        // while q is not empty {
-        //     decision.put("action",q . dequeue)
-        // }
-        // else{
-        //     put stop
-        // }
+
         
 
 
-        if (fart != 1){
-            decision.put("action", "echo");
-        }
 
-        if(fart >=1){
-            decision.put("action","stop");
-        }
-        fart++;
-
-        // decision.put("action", "stop");
+        decision.put("action", "stop");
 
         logger.info("** Decision: {}",decision.toString());
         return decision.toString();
@@ -62,12 +48,17 @@ public class Explorer implements IExplorerRaid {
     public void acknowledgeResults(String s) {
         JSONObject response = new JSONObject(new JSONTokener(new StringReader(s)));
         logger.info("** Response received:\n"+response.toString(2));
+
         Integer cost = response.getInt("cost");
         logger.info("The cost of the action was {}", cost);
+
         String status = response.getString("status");
         logger.info("The status of the drone is {}", status);
+        
         JSONObject extraInfo = response.getJSONObject("extras");
         logger.info("Additional information received: {}", extraInfo);
+
+        drone.getResults(response);
     }
 
     @Override

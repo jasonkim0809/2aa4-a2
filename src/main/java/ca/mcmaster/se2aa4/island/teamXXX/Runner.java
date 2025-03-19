@@ -1,7 +1,6 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 import java.io.File;
 
-import ca.mcmaster.se2aa4.island.teamXXX.enums.Actions;
 import static eu.ace_design.island.runner.Runner.run;
 
 
@@ -9,10 +8,6 @@ public class Runner {
 
     public static void main(String[] args) {
         String filename = args[0];
-        
-        Actions test;
-        test = Actions.turn_left;
-        test.enumtest();
         try {
             run(Explorer.class)
                     .exploring(new File(filename))
