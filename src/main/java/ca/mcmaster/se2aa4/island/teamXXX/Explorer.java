@@ -12,6 +12,7 @@ import eu.ace_design.island.bot.IExplorerRaid;
 
 public class Explorer implements IExplorerRaid {
     private Drone drone;
+    private islandFinder islandF;
 
     private final Logger logger = LogManager.getLogger();
 
@@ -32,10 +33,12 @@ public class Explorer implements IExplorerRaid {
         String next_decision = drone.getDecision();
 
         JSONObject decision = new JSONObject();
+        
 
         
         //decision.put("action",next_decision)
 
+    
 
         decision.put("action", "stop");
 
