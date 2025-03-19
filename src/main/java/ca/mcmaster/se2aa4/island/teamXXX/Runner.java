@@ -1,8 +1,8 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 
-import static eu.ace_design.island.runner.Runner.run;
-
 import java.io.File;
+
+import static eu.ace_design.island.runner.Runner.run;
 
 public class Runner {
 
@@ -24,6 +24,7 @@ public class Runner {
             e.printStackTrace(System.err);
             System.exit(1);
         }
+        System.out.println("fart");
     }
 
 }

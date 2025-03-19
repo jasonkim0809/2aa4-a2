@@ -1,12 +1,14 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 
 import java.io.StringReader;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import eu.ace_design.island.bot.IExplorerRaid;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import eu.ace_design.island.bot.IExplorerRaid;
+
 
 public class Explorer implements IExplorerRaid {
 
@@ -21,15 +23,42 @@ public class Explorer implements IExplorerRaid {
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
+
     }
 
+
+    static int fart = 0;
     @Override
     public String takeDecision() {
+
         JSONObject decision = new JSONObject();
-        decision.put("action", "stop"); // we stop the exploration immediately
+        
+        // while q is not empty {
+        //     decision.put("action",q . dequeue)
+        // }
+        // else{
+        //     put stop
+        // }
+
+
+        if (fart%2 == 1){
+            decision.put("action", "scan");
+        }
+        else{
+            decision.put("action", "fly");
+        }
+
+        if(fart >=10){
+            decision.put("action","stop");
+        }
+        fart++;
+
+        // decision.put("action", "stop");
+
         logger.info("** Decision: {}",decision.toString());
         return decision.toString();
     }
+
 
     @Override
     public void acknowledgeResults(String s) {
@@ -48,4 +77,9 @@ public class Explorer implements IExplorerRaid {
         return "no creek found";
     }
 
+}
+
+class Drone {
+    private int battery;
+    
 }
