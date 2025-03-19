@@ -39,16 +39,14 @@ public class Explorer implements IExplorerRaid {
         // else{
         //     put stop
         // }
+        
 
 
-        if (fart%2 == 1){
-            decision.put("action", "scan");
-        }
-        else{
-            decision.put("action", "fly");
+        if (fart != 1){
+            decision.put("action", "echo");
         }
 
-        if(fart >=10){
+        if(fart >=1){
             decision.put("action","stop");
         }
         fart++;
@@ -81,5 +79,5 @@ public class Explorer implements IExplorerRaid {
 
 class Drone {
     private int battery;
-    
+
 }
