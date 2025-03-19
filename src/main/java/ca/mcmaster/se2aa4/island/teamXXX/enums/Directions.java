@@ -59,4 +59,17 @@ public enum Directions {
 
         return new_str;
     }
+    public static Directions fromString(String s){
+        switch (s) {
+            case "N":
+                return Directions.N;
+            case "E":
+                return Directions.E;
+            case "W":
+                return Directions.W;
+            case "S":
+                return Directions.S;
+        };
+        return null;
+    }
 }
