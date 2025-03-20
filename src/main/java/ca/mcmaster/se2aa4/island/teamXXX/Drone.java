@@ -10,7 +10,7 @@ public class Drone {
     private int battery_level;
     private Directions direction;
     private int phase = 0;
-    private IslandFinder islandFinder;
+    private final IslandFinder islandFinder;
 
     public Drone(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
@@ -25,11 +25,8 @@ public class Drone {
             decision = islandFinder.findNextStep();
         }
         else if (phase == 1){
-            decision.put("action","scan");
-            phase++;
-        }
-        else if (phase == 2){
             decision.put("action","stop");
+            phase++;
         }
         return decision;
     }
