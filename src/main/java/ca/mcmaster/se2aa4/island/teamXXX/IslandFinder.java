@@ -32,6 +32,10 @@ public class IslandFinder {
         this.echoDirection = direction.turn_left();
     }
 
+    public boolean foundLand(){
+        return this.landFound;
+    }
+
     private class echoResults{
         int range;
         String found; // either "GROUND" or "OUT_OF_RANGE"
@@ -44,7 +48,7 @@ public class IslandFinder {
     }
 
     private boolean isGround(echoResults echo){
-        return (echo!=null && echo.direction.toString() == "GROUND");
+        return (echo!=null && echo.found == "GROUND");
     }
 
     public JSONObject findNextStep(){
@@ -117,14 +121,14 @@ public class IslandFinder {
         }
     }
 
-    public void updateEchoResults(JSONObject results){
+    public void updateEchoResults(JSONObject results){ // called from acknowledgeResults, done after action
         JSONObject extras = results.getJSONObject("extras");
         if (!extras.has("found") || !extras.has("range")) { // check results JSON if an echo was even used
             return; 
         }
 
         int range = extras.getInt("range");
-        String found = extras.getString("found");
+        String found = extras.getString("found"); // either "GROUND" or "OUT_OF_RANGE"
 
         if (echoDirection == direction.turn_left()){ // current echo direction is left (first step)
             leftEcho = new echoResults(echoDirection,range,found);
