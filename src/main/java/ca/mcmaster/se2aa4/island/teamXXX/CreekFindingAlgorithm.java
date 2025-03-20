@@ -8,29 +8,44 @@ import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
+interface DroneScannerResults{
+
+    private JSONObject initCreeks;
+    private JSONObject initBiomes;
+    public JSONObject extras;
+
+    private JSONObject parseCreekResult(JSONObject scannedCreeks);
+    private JSONObject parseBiomesResult(JSONObject scannedBiomes);
+    public JSONObject parseScanResults(JSONObject resultExtras);
+
+}
+
+enum Biomes {
+
+    OCEAN, LAKE, BEACH, GRASSLAND, MANGROVE, TROPICAL_RAIN_FOREST, TROPICAL_SEASONAL_FOREST, TEMPERATE_DECIDUOUS_FOREST, TEMPERATE_RAIN_FOREST, TEMPERATE_DESERT, TAIGA, SNOW, TUNDRA, ALPINE, GLACIER, SHRUBLAND, SUB_TOPICAL_DESERT;
+
+}
 
 public class CreekFindingAlgorithm {
     private final Logger logger = LogManager.getLogger();
-    private Directions direction;
 
 
     public CreekFindingAlgorithm(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
-        String init_heading = info.getString("heading");
-        direction = Directions.fromString(init_heading);
-        logger.info("Initial heading: {}",direction.toString());
-
     }
 
     private class scanResults{
         Directions direction;
-        public echoResults(Directions direction){
+        public scanResults(Directions direction){
             this.direction = direction;
+
+            initCreeks = info.getJSONArray("creeks");
+            initBiomes = info.getJSONArray("biomes");
 
         }
     }
 
-    public JSONObject findNextStep(){
+    public void findNextStep(){
 
 
     }
