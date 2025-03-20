@@ -12,7 +12,6 @@ import eu.ace_design.island.bot.IExplorerRaid;
 
 public class Explorer implements IExplorerRaid {
     private Drone drone;
-    private IslandFinder islandF;
 
     private final Logger logger = LogManager.getLogger();
 
@@ -25,6 +24,7 @@ public class Explorer implements IExplorerRaid {
         Integer batteryLevel = info.getInt("budget");
         logger.info("The drone is facing {}", direction);
         logger.info("Battery level is {}", batteryLevel);
+        drone = new Drone(s);
 
         
         //test stuff for island finder
@@ -37,29 +37,9 @@ public class Explorer implements IExplorerRaid {
     public String takeDecision() { // dependent on what phase of searching the drone is in
 
         JSONObject decision = new JSONObject();
-        JSONObject parameter = new JSONObject();
 
-        // if (counter == 0){
-        //     decision.put("action","scan");
-        //     counter++;
-        // }
-        // else if (counter == 1){
-        //     parameter.put("direction","E");
-        //     decision.put("parameters",parameter);
-        //     decision.put("action","heading");
-        //     counter++;
-        // }
-        // else if (counter == 2){
-        //     decision.put("action","scan");
-        //     counter++;
-        // }
-        // else{
-        //     decision.put("action","stop");
-        // }
-
-        parameter.put("direction","N");
-        decision.put("action","echo");
-        decision.put("parameters",parameter);
+        decision = drone.getDecision();
+        
     
 
         //decision.put("action", "scan");
@@ -83,8 +63,7 @@ public class Explorer implements IExplorerRaid {
         JSONObject extraInfo = response.getJSONObject("extras");
         logger.info("Additional information received: {}", extraInfo);
 
-        //islandF.updateEchoResults(response);
-        //drone.getResults(response);
+        drone.getResults(response);
     }
 
     @Override

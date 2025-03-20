@@ -1,24 +1,48 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
+import java.io.StringReader;
+
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 public class Drone {
     private int battery_level;
     private Directions direction;
+    private int phase = 0;
+    private final IslandFinder islandFinder;
 
-    public String getDecision(){ // called by explorer class
-        // echo logic, change decision returned
-        return "temp";
+    public Drone(String s){
+        JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
+        direction = Directions.fromString(info.getString("heading"));
+        battery_level = info.getInt("budget");
+        islandFinder = new IslandFinder(s);
     }
+
+    public JSONObject getDecision(){ // called by explorer class
+        JSONObject decision = new JSONObject();
+        if (phase == 0){
+            decision = islandFinder.findNextStep();
+        }
+        else if (phase == 1){
+            decision.put("action","stop");
+            phase++;
+        }
+        return decision;
+    }
+
     public String getDirection(){
         return direction.toString();
     }
-    public void getResults(JSONObject in){
 
+    public void getResults(JSONObject response){    
+        islandFinder.updateEchoResults(response);
+        this.updatePhase();
     }
-    public void echo(String echoDirection){
 
-        // echo logic here
+    private void updatePhase(){
+        if (islandFinder.isFinished() && phase == 0){
+            phase++;
+        }
     }
 }
