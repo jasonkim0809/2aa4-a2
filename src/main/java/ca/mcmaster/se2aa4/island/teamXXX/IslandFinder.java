@@ -18,9 +18,12 @@ public class IslandFinder {
     private echoResults leftEcho = null;
     private echoResults rightEcho = null;
     private echoResults forwardEcho = null;
-    private boolean echoComplete = false;
 
-    private boolean landFound = false;
+    private boolean finished = false;
+    
+    private boolean echoComplete = false;
+    private boolean facingLand = false;
+    private boolean readyToScan = false;
 
 
     public IslandFinder(String s){
@@ -32,8 +35,8 @@ public class IslandFinder {
         this.echoDirection = direction.turn_left();
     }
 
-    public boolean foundLand(){
-        return this.landFound;
+    public boolean isFinished(){
+        return this.finished;
     }
 
     private class echoResults{
@@ -48,12 +51,43 @@ public class IslandFinder {
     }
 
     private boolean isGround(echoResults echo){
-        return (echo!=null && echo.found == "GROUND");
+        return (echo!=null && "GROUND".equals(echo.found));
+    }
+
+    public JSONObject findNextStepTest(){
+        JSONObject decision = new JSONObject();
+        JSONObject parameters = new JSONObject();
+
+        parameters.put("direction",direction.turn_right().toString());
+        decision.put("parameters",parameters);
+        decision.put("action","heading");
+        return decision;
     }
 
     public JSONObject findNextStep(){
         JSONObject decision = new JSONObject();
         JSONObject parameters = new JSONObject();
+
+        if (facingLand){ // prematurely check if already facing land
+            if (forwardEcho == null || readyToScan){
+                parameters.put("direction",direction.toString());
+                decision.put("parameters",parameters);
+                decision.put("action","echo");
+                readyToScan = false;
+                return decision;
+            }
+            else if (forwardEcho.range == 0){
+                finished = true;
+                decision.put("action","scan");
+                return decision;
+            }
+            else{
+                decision.put("action","fly");
+                readyToScan = true;
+                return decision;
+            }
+        }
+
         if (!echoComplete){
             if (echoDirection == direction.turn_left()){ // return a left echo as decision JSON
                 parameters.put("direction",direction.turn_left().toString());
@@ -72,27 +106,24 @@ public class IslandFinder {
             if (isGround(leftEcho) || isGround(forwardEcho) || isGround(rightEcho)){ // ground detected in at least ONE of these
                 Directions movedir = null;
                 int closestRange = 0;
-                for (echoResults echo : new echoResults[]{leftEcho,forwardEcho,rightEcho}){ // for loop to initialize closestRange with SOMETHING from a valid echo (not null)
-                    if(echo!=null){
-                        closestRange = echo.range;
-                        break;
-                    }
-                }
 
                 for (echoResults echo : new echoResults[]{leftEcho,forwardEcho,rightEcho}){ // for loop to set closestRange to smallest echo found
-                        if (echo.range < closestRange){
+                        if (isGround(echo)){
                             movedir = echo.direction;
                             closestRange = echo.range;
                         }
                 }
 
                 if (movedir != direction){ // if next move is forwards, do NOT use heading (ends game)
-                    parameters.put("direction",movedir);
+                    parameters.put("direction",movedir.toString());
                     decision.put("parameters",parameters);
                     decision.put("action","heading"); // heading action also turns/moves the drone
+                    facingLand = true;
                 }
                 else{
-                    decision.put("action","fly");
+                    decision.put("action","scan");
+                    facingLand = true;
+                    return decision;
                 }
                 
                 
@@ -106,8 +137,21 @@ public class IslandFinder {
                 return decision;
             }
             else{ // no ground detected ANYWHERE!!!
+                int rightRange = rightEcho.range; // shouldn't have to check if they're null because we get to this point after scanning all 3 times ?
+                int leftRange = leftEcho.range;
 
-
+                if (rightRange >= leftRange){ // turning right
+                    parameters.put("direction",direction.turn_right().toString());
+                    direction = direction.turn_right();
+                    echoDirection = echoDirection.turn_right();
+                }
+                else if (rightRange < leftRange){ // turning left
+                    parameters.put("direction",direction.turn_left().toString());
+                    direction = direction.turn_left();
+                    echoDirection = echoDirection.turn_left();
+                }
+                decision.put("parameters",parameters);
+                decision.put("action","heading");
 
                 // reset echo conditions
                 echoComplete = false;
