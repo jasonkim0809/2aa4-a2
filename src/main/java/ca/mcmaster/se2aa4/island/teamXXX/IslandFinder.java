@@ -9,7 +9,7 @@ import org.json.JSONTokener;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 
-public class islandFinder {
+public class IslandFinder {
     private final Logger logger = LogManager.getLogger();
     private Directions direction;
 
@@ -23,13 +23,17 @@ public class islandFinder {
     private boolean landFound = false;
 
 
-    public islandFinder(String s){
+    public IslandFinder(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         String init_heading = info.getString("heading");
         direction = Directions.fromString(init_heading);
         logger.info("Initial heading: {}",direction.toString());
 
         this.echoDirection = direction.turn_left();
+    }
+
+    public boolean foundLand(){
+        return this.landFound;
     }
 
     private class echoResults{
@@ -44,7 +48,7 @@ public class islandFinder {
     }
 
     private boolean isGround(echoResults echo){
-        return (echo!=null && echo.direction.toString() == "GROUND");
+        return (echo!=null && echo.found == "GROUND");
     }
 
     public JSONObject findNextStep(){
@@ -102,7 +106,7 @@ public class islandFinder {
                 return decision;
             }
             else{ // no ground detected ANYWHERE!!!
-                
+
 
 
                 // reset echo conditions
@@ -117,14 +121,14 @@ public class islandFinder {
         }
     }
 
-    public void updateEchoResults(JSONObject results){
+    public void updateEchoResults(JSONObject results){ // called from acknowledgeResults, done after action
         JSONObject extras = results.getJSONObject("extras");
         if (!extras.has("found") || !extras.has("range")) { // check results JSON if an echo was even used
             return; 
         }
 
         int range = extras.getInt("range");
-        String found = extras.getString("found");
+        String found = extras.getString("found"); // either "GROUND" or "OUT_OF_RANGE"
 
         if (echoDirection == direction.turn_left()){ // current echo direction is left (first step)
             leftEcho = new echoResults(echoDirection,range,found);
