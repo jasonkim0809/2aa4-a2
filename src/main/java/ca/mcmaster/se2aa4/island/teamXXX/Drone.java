@@ -40,7 +40,7 @@ public class Drone {
         else if (phase == 1) {
             decision = perimeterMapping.findNextStep();
             // logger.info("Island Finder direction: {}",islandFinder.getDirection().toString());
-            // logger.info("Perimeter mapper direction: {}",perimeterMapping.getDirection());
+            logger.info("Perimeter mapper direction: {}",perimeterMapping.getDirection());
             // decision.put("action","stop");
         }
         else {

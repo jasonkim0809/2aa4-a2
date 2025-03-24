@@ -75,6 +75,11 @@ public class IslandFinder {
                 decision.put("action","scan");
                 return decision;
             }
+            else if (!isGround(forwardEcho)){
+                finished = true;
+                decision.put("action","scan");
+                return decision;
+            }
             else{
                 decision.put("action","fly");
                 readyToScan = true;
