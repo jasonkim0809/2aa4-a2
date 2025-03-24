@@ -70,12 +70,6 @@ public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationI
         return this.finished;
     }
 
-    public void overrideDirection(Directions d){
-        initialDirections = d;
-        direction = d;
-        echoDirection = direction.turn_left();
-    }
-
     public String getDirection(){
         return direction.toString();
     }
