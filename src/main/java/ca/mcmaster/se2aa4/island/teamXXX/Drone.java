@@ -6,6 +6,8 @@ import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
+import java.io.*;
+
 public class Drone {
     private int battery_level;
     private Directions direction;
@@ -31,6 +33,7 @@ public class Drone {
 
             perimeterDimensions = new PerimeterDimensions(perimeterMapping.perimeterValues()[0], perimeterMapping.perimeterValues()[1], perimeterMapping.perimeterValues()[2], perimeterMapping.perimeterValues()[3]);
 
+            System.out.println(perimeterMapping.perimeterValues()[0] + " , " + perimeterMapping.perimeterValues()[1] + " , " + perimeterMapping.perimeterValues()[2] + " , " + perimeterMapping.perimeterValues()[3]);
 
             decision.put("action","stop");
             phase++;
