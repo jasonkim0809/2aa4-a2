@@ -1,12 +1,9 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 //import static org.junit.Assert.fail;
 
-import java.io.StringReader;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers.DroneEchoAnalyzer;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
@@ -45,9 +42,7 @@ public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationI
     private boolean finished = false;
 
     public PerimeterMappingAlgorithm(String s){
-        JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
-        String init_heading = info.getString("heading");
-        this.direction = Directions.fromString(init_heading);
+        this.direction = Directions.fromString(s);
 
         initialDirections = direction;
         echoDirection = direction.turn_left();

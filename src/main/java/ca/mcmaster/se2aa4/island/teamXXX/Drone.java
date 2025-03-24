@@ -25,7 +25,7 @@ public class Drone {
         direction = Directions.fromString(info.getString("heading"));
         battery_level = info.getInt("budget");
         islandFinder = new IslandFinder(s);
-        perimeterMapping = new PerimeterMappingAlgorithm(s);
+        perimeterMapping = new PerimeterMappingAlgorithm(direction.toString());
     }
 
     public JSONObject getDecision(){ // called by explorer class
@@ -38,10 +38,10 @@ public class Drone {
 
         }
         else if (phase == 1) {
-            //decision = perimeterMapping.findNextStep();
-            logger.info("Island Finder direction: {}",islandFinder.getDirection().toString());
-            logger.info("Perimeter mapper direction: {}",perimeterMapping.getDirection());
-            decision.put("action","stop");
+            decision = perimeterMapping.findNextStep();
+            // logger.info("Island Finder direction: {}",islandFinder.getDirection().toString());
+            // logger.info("Perimeter mapper direction: {}",perimeterMapping.getDirection());
+            // decision.put("action","stop");
         }
         else {
             decision.put("action","stop");
@@ -63,7 +63,7 @@ public class Drone {
 
     private void updatePhase(){
         if (islandFinder.isFinished() && phase == 0){
-            perimeterMapping.overrideDirection(direction);
+            perimeterMapping = new PerimeterMappingAlgorithm(islandFinder.getDirection().toString());
             phase++;
         }
         else if (perimeterMapping.isFinished() && phase == 1){
