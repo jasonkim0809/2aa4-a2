@@ -89,11 +89,6 @@ public class AreaScan {
             if(distanceToSite < smallestToSite){
                 smallestToSite = distanceToSite;
             }
-
-            logger.info("site size{}",sites.size());
-            logger.info("site id{}",sites.get(i).getID());
-            logger.info("site X{}",sites.get(i).getX());
-            logger.info("site Y{}",sites.get(i).getY());
         }
         return this.finished;
     }
@@ -119,20 +114,6 @@ public class AreaScan {
         if (!taskQueue.isEmpty()){
             return taskQueue.remove();
         }
-        
-
-        logger.info("onWater{}",onOcean);
-        logger.info("outOfBounds{}",outOfBounds);
-        logger.info("range{}",range);
-        logger.info("turningRight{}",turningRight);
-        logger.info("droneDirection{}",droneDirection);
-        logger.info("droneY{}",dronePosition.getDroneY());
-        logger.info("droneX{}",dronePosition.getDroneX());
-        logger.info("reverseTurn{}",reverseTurn);
-        logger.info("returnOutwards{}",returnOutwards);
-        logger.info("reset{}",reset);
-        logger.info("onWayBack{}",onWayBack);
-
 
         if ( onOcean == false ){
             linearScan();
@@ -143,7 +124,7 @@ public class AreaScan {
             linearScan();
             echoForward();
         } else {
-            logger.info("HELPME");
+   
             if(onWayBack == false){
                 switch(droneDirection){
                     case E:
@@ -152,20 +133,18 @@ public class AreaScan {
                         if (dronePosition.getDroneY() == perimeterEdgePositions[0]-1){ //lowest point
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO1");
     
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[0]){
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO1");
+
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]+1){ //lowest point
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO1");
+
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]){
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO1");
                         }
                         break;
                     
@@ -173,19 +152,19 @@ public class AreaScan {
                         if (dronePosition.getDroneY() == perimeterEdgePositions[0]-1){ //lowest point
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO2A");
+
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[0]){
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO2B");
+                         
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]+1){ //lowest point
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO2C");
+                          
                         } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]){
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO2D");
+                           
                         }
                         
                         break;
@@ -193,19 +172,19 @@ public class AreaScan {
                         if (dronePosition.getDroneX() == perimeterEdgePositions[1]-1){ //lowest point
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO3");
+                           
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]){
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO3");
+                           
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]+1){ //lowest point
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO3");
+                            
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]){
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO3");
+                          
                         }   
                         
                         break;
@@ -213,19 +192,19 @@ public class AreaScan {
                         if (dronePosition.getDroneX() == perimeterEdgePositions[2]+1){ //lowest point
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO4");
+                           
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]){
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO4");
+                          
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]-1){ //lowest point
                             returnOutwards = false;
                             reverseTurn = true;
-                            logger.info("HELLO4");
+                           
                         } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]){
                             returnOutwards = true;
                             reverseTurn = true;
-                            logger.info("HELLO4");
+                           
                         }
     
                         break;
@@ -280,9 +259,6 @@ public class AreaScan {
             this.taskQueue.add(decision.put("action", "stop").toString());
             isFinished();
         }
-
-        logger.info("SCANNEDLANES{}",scannedLanes);
-        logger.info("lengthOfIsland{}",lengthOfIsland);
 
         creeksFound = "";
         sitesFound = "";
@@ -357,7 +333,6 @@ public class AreaScan {
 
     private void turnRight(){
 
-        logger.info("I WANT TO DIE");
         dronePosition.updatePosition("TURN_RIGHT",droneDirection);
 
         parameter.put("direction", droneDirection.turn_right().toString());
@@ -382,7 +357,6 @@ public class AreaScan {
 
     private void turnBack(boolean turningRight){
 
-        logger.info("TURNYOUPIECEOFACTUAL");
         fly();
 
         if (turningRight == true){
