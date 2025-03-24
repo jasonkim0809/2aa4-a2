@@ -9,15 +9,15 @@ import org.json.JSONTokener;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 
-public class IslandFinder {
+public class IslandFinder implements NavigationInterface{
     private final Logger logger = LogManager.getLogger();
     private Directions direction;
 
     private Directions echoDirection; // represents which direction to scan in right now, goes left, forward, right
 
-    private echoResults leftEcho = null;
-    private echoResults rightEcho = null;
-    private echoResults forwardEcho = null;
+    private EchoResults leftEcho = null;
+    private EchoResults rightEcho = null;
+    private EchoResults forwardEcho = null;
 
     private boolean finished = false;
     
@@ -39,18 +39,18 @@ public class IslandFinder {
         return this.finished;
     }
 
-    private class echoResults{
+    private class EchoResults{
         int range;
         String found; // either "GROUND" or "OUT_OF_RANGE"
         Directions direction;
-        public echoResults(Directions direction, int range, String found){
+        public EchoResults(Directions direction, int range, String found){
             this.direction = direction;
             this.range = range;
             this.found = found;
         }
     }
 
-    private boolean isGround(echoResults echo){
+    private boolean isGround(EchoResults echo){
         return (echo!=null && "GROUND".equals(echo.found));
     }
 
@@ -106,7 +106,7 @@ public class IslandFinder {
                 Directions movedir = null;
                 int closestRange = 0;
 
-                for (echoResults echo : new echoResults[]{leftEcho,forwardEcho,rightEcho}){ // for loop to set closestRange to smallest echo found
+                for (EchoResults echo : new EchoResults[]{leftEcho,forwardEcho,rightEcho}){ // for loop to set closestRange to smallest echo found
                         if (isGround(echo)){
                             movedir = echo.direction;
                             closestRange = echo.range;
@@ -165,7 +165,7 @@ public class IslandFinder {
         }
     }
 
-    public void updateEchoResults(JSONObject results){ // called from acknowledgeResults, done after action
+    public void updateResults(JSONObject results){ // called from acknowledgeResults, done after action
         JSONObject extras = results.getJSONObject("extras");
         if (!extras.has("found") || !extras.has("range")) { // check results JSON if an echo was even used
             return; 
@@ -175,15 +175,15 @@ public class IslandFinder {
         String found = extras.getString("found"); // either "GROUND" or "OUT_OF_RANGE"
 
         if (echoDirection == direction.turn_left()){ // current echo direction is left (first step)
-            leftEcho = new echoResults(echoDirection,range,found);
+            leftEcho = new EchoResults(echoDirection,range,found);
             echoDirection = direction;
         }
         else if (echoDirection == direction){ // current echo direction is forward
-            forwardEcho = new echoResults(echoDirection,range,found);
+            forwardEcho = new EchoResults(echoDirection,range,found);
             echoDirection = direction.turn_right();
         }
         else if (echoDirection == direction.turn_right()){ // current echo direction is right (final step)
-            rightEcho = new echoResults(echoDirection,range,found);
+            rightEcho = new EchoResults(echoDirection,range,found);
             echoDirection = direction.turn_left();
             echoComplete = true;
         }

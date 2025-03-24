@@ -52,7 +52,7 @@ public class Drone {
 
     public void getResults(JSONObject response){
         if (phase == 0){
-            islandFinder.updateEchoResults(response);    
+            islandFinder.updateResults(response);    
         }
         else if (phase == 1){ 
             perimeterMapping.updateResults(response);
