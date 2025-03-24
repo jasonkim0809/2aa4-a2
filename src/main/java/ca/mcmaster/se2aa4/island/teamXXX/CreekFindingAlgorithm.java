@@ -109,6 +109,116 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
     }
 
+    public JSONObject flyStraight() {
+
+        JSONObject decision = new JSONObject();
+
+        decision.put("action","fly");
+
+        if (direction == Directions.N) {
+
+            currentPosition[1] += 1;
+
+        } else if (direction == Directions.E) {
+
+            currentPosition[0] += 1;
+
+        } else if (direction == Directions.W) {
+
+            currentPosition[0] -= 1;
+
+        } else {
+
+            currentPosition[1] -= 1;
+
+        }
+
+        return decision;
+    }
+
+    public JSONObject turnRight() {
+
+        JSONObject decision = new JSONObject();
+        JSONObject parameters = new JSONObject();
+        
+        parameters.put("direction",direction.turn_right().toString());
+        decision.put("parameters",parameters);
+        decision.put("action","heading");
+
+        if (direction == Directions.N) {
+
+            currentPosition[0] += 1;
+            currentPosition[1] += 1;
+
+        }else if (direction == Directions.E) {
+
+            currentPosition[0] += 1;
+            currentPosition[1] -= 1;
+
+        } else if (direction == Directions.W) {
+
+            currentPosition[0] -= 1;
+            currentPosition[1] += 1;
+        } else {
+
+            currentPosition[0] -= 1;
+            currentPosition[1] -= 1;
+
+        }
+
+        direction = direction.turn_right();
+
+        return decision;
+
+    }
+
+    public JSONObject turnRight(int[] locationToMark) {
+
+        JSONObject decision = new JSONObject();
+        JSONObject parameters = new JSONObject();
+
+        parameters.put("direction",direction.turn_right().toString());
+        decision.put("parameters",parameters);
+        decision.put("action","heading");
+
+        if (direction == Directions.N) {
+
+            edgePositions[0] = locationToMark[1];
+
+            currentPosition[0] += 1;
+            currentPosition[1] += 1;
+
+        }else if (direction == Directions.E) {
+
+            edgePositions[1] = locationToMark[0];
+
+            currentPosition[0] += 1;
+            currentPosition[1] -= 1;
+
+        } else if (direction == Directions.W) {
+
+            edgePositions[2] = locationToMark[0];
+
+            currentPosition[0] -= 1;
+            currentPosition[1] += 1;
+
+
+        } else {
+
+            edgePositions[3] = locationToMark[0];
+
+            currentPosition[0] -= 1;
+            currentPosition[1] -= 1;
+
+        }
+
+        direction = direction.turn_right();
+        echoDirection = direction.turn_left();
+
+        return decision;
+    }
+
+
     @Override
     public JSONObject findNextStep(){
         JSONObject decision = new JSONObject();
@@ -127,181 +237,38 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
                     if ((direction == Directions.N | direction == Directions.S) & Math.abs(currentPosition[1]) == 1) {
 
-                        parameters.put("direction",direction.turn_right().toString());
-                        decision.put("parameters",parameters);
-                        decision.put("action","heading");
-        
-                        if (direction == Directions.N) {
-        
-                            currentPosition[0] += 1;
-                            currentPosition[1] += 1;
-    
-                        }else if (direction == Directions.E) {
-        
-                            currentPosition[0] += 1;
-                            currentPosition[1] -= 1;
-    
-                        } else if (direction == Directions.W) {
-        
-                            currentPosition[0] -= 1;
-                            currentPosition[1] += 1;
-                        } else {
-    
-                            currentPosition[0] -= 1;
-                            currentPosition[1] -= 1;
-
-                        }
-
-                        direction = direction.turn_right();
-
                         returnToIntialPosPhase += 1;
 
-                        return decision;
+                        return this.turnRight();
 
                     } else if ((direction == Directions.N | direction == Directions.S) & Math.abs(currentPosition[1]) > 1) {
-
-                        decision.put("action","fly");
-
-                        if (direction == Directions.N) {
-            
-                            currentPosition[1] += 1;
-            
-                        } else if (direction == Directions.E) {
-            
-                            currentPosition[0] += 1;
-            
-                        } else if (direction == Directions.W) {
-            
-                            currentPosition[0] -= 1;
-            
-                        } else {
-            
-                            currentPosition[1] -= 1;
-            
-                        }
                         
-                        return decision;
+                        return this.flyStraight();
 
                     } else if ((direction == Directions.W | direction == Directions.E) & Math.abs(currentPosition[0]) == 1) {
 
-                        parameters.put("direction",direction.turn_right().toString());
-                        decision.put("parameters",parameters);
-                        decision.put("action","heading");
-        
-                        if (direction == Directions.N) {
-        
-                            currentPosition[0] += 1;
-                            currentPosition[1] += 1;
-    
-                        }else if (direction == Directions.E) {
-        
-                            currentPosition[0] += 1;
-                            currentPosition[1] -= 1;
-    
-                        } else if (direction == Directions.W) {
-        
-                            currentPosition[0] -= 1;
-                            currentPosition[1] += 1;
-                        } else {
-    
-                            currentPosition[0] -= 1;
-                            currentPosition[1] -= 1;
-
-                        }
-
-                        direction = direction.turn_right();
-
                         returnToIntialPosPhase += 1;
 
-                        return decision;
+                        return this.turnRight();
 
                     } else if ((direction == Directions.W | direction == Directions.E) & Math.abs(currentPosition[0]) > 1) {
-
-                        decision.put("action","fly");
-
-                        if (direction == Directions.N) {
-            
-                            currentPosition[1] += 1;
-            
-                        } else if (direction == Directions.E) {
-            
-                            currentPosition[0] += 1;
-            
-                        } else if (direction == Directions.W) {
-            
-                            currentPosition[0] -= 1;
-            
-                        } else {
-            
-                            currentPosition[1] -= 1;
-            
-                        }
                         
-                        return decision;
+                        return this.flyStraight();
 
                     }
 
-                } else {
-
-                    parameters.put("direction",direction.turn_right().toString());
-                    decision.put("parameters",parameters);
-                    decision.put("action","heading");
-
-                    if (direction == Directions.N) {
-
-                        currentPosition[0] += 1;
-                        currentPosition[1] += 1;
-
-                    }else if (direction == Directions.E) {
-
-                        currentPosition[0] += 1;
-                        currentPosition[1] -= 1;
-
-                    } else if (direction == Directions.W) {
-
-                        currentPosition[0] -= 1;
-                        currentPosition[1] += 1;
-
-
-                    } else {
-
-                        currentPosition[0] -= 1;
-                        currentPosition[1] -= 1;
-
-                    }
-
-                    direction = direction.turn_right();
+                } else {;
                     
-                    return decision;
+                    return this.turnRight();
 
                 }
 
             } else {
 
-                decision.put("action","fly");
-
-                if (direction == Directions.N) {
-    
-                    currentPosition[1] += 1;
-    
-                } else if (direction == Directions.E) {
-    
-                    currentPosition[0] += 1;
-    
-                } else if (direction == Directions.W) {
-    
-                    currentPosition[0] -= 1;
-    
-                } else {
-    
-                    currentPosition[1] -= 1;
-    
-                }
-                
-                return decision;
+                return this.flyStraight();
 
             }
-            
+
 
         }
 
@@ -309,42 +276,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
             isUTurningPhases = 3;
 
-            parameters.put("direction",direction.turn_right().toString());
-            decision.put("parameters",parameters);
-            decision.put("action","heading");
-
-            if (direction == Directions.N) {
-
-                edgePositions[0] = currentPosition[1];
-
-                currentPosition[0] += 1;
-                currentPosition[1] += 1;
-
-            }else if (direction == Directions.E) {
-
-                edgePositions[1] = currentPosition[0];
-
-                currentPosition[0] += 1;
-                currentPosition[1] -= 1;
-
-            } else if (direction == Directions.W) {
-
-                edgePositions[2] = currentPosition[0];
-
-                currentPosition[0] -= 1;
-                currentPosition[1] += 1;
-
-
-            } else {
-
-                edgePositions[3] = currentPosition[0];
-
-                currentPosition[0] -= 1;
-                currentPosition[1] -= 1;
-
-            }
-
-            direction = direction.turn_right();
+            decision = this.turnRight();
             echoDirection = direction.turn_left();
 
             return decision;
@@ -353,29 +285,9 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
             isUTurningPhases = 1;
 
-            decision.put("action","fly");
-
-            if (direction == Directions.N) {
-
-                currentPosition[1] += 1;
-
-            } else if (direction == Directions.E) {
-
-                currentPosition[0] += 1;
-
-            } else if (direction == Directions.W) {
-
-                currentPosition[0] -= 1;
-
-            } else {
-
-                currentPosition[1] -= 1;
-
-            }
-
             isEchoing = true;
 
-            return decision;
+            return this.flyStraight();
 
         }
 
@@ -399,49 +311,13 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
         } else {
             if (leftEcho == null && rightEcho == null ) {
 
-                decision.put("action","fly");
-
-                if (direction == Directions.N) {
-
-                    currentPosition[1] += 1;
-
-                } else if (direction == Directions.E) {
-
-                    currentPosition[0] += 1;
-
-                } else if (direction == Directions.W) {
-
-                    currentPosition[0] -= 1;
-
-                } else {
-
-                    currentPosition[1] -= 1;
-
-                }
+                decision = this.flyStraight();
 
                 isEchoing = true;
 
             } else if (leftEcho.found == Found.GROUND | rightEcho.found == Found.GROUND) {
 
-                decision.put("action","fly");
-
-                if (direction == Directions.N) {
-
-                    currentPosition[1] += 1;
-
-                } else if (direction == Directions.E) {
-
-                    currentPosition[0] += 1;
-
-                } else if (direction == Directions.W) {
-
-                    currentPosition[0] -= 1;
-
-                } else {
-
-                    currentPosition[1] -= 1;
-
-                }
+                decision = this.flyStraight();
 
                 isEchoing = true;
 
@@ -459,43 +335,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
                 edgePosCollected += 1;
 
-                parameters.put("direction",direction.turn_right().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                if (direction == Directions.N) {
-
-                    edgePositions[0] = currentPosition[1];
-
-                    currentPosition[0] += 1;
-                    currentPosition[1] += 1;
-
-                }else if (direction == Directions.E) {
-
-                    edgePositions[1] = currentPosition[0];
-
-                    currentPosition[0] += 1;
-                    currentPosition[1] -= 1;
-
-                } else if (direction == Directions.W) {
-
-                    edgePositions[2] = currentPosition[0];
-
-                    currentPosition[0] -= 1;
-                    currentPosition[1] += 1;
-
-
-                } else {
-
-                    edgePositions[3] = currentPosition[0];
-
-                    currentPosition[0] -= 1;
-                    currentPosition[1] -= 1;
-
-                }
-
-                direction = direction.turn_right();
-                echoDirection = direction.turn_left();
+                decision = turnRight(currentPosition);
             }
 
         }
