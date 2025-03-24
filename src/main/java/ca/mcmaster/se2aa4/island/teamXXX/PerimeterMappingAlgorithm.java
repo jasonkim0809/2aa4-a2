@@ -16,25 +16,24 @@ import ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers.DroneEchoAnalyzer;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Found;
 
-class echoResults{
+class EchoResults{
     int range;
     Found found; // either "GROUND" or "OUT_OF_RANGE"
     Directions direction;
-    public echoResults(Directions direction, int range, Found found){
+    public EchoResults(Directions direction, int range, Found found){
         this.direction = direction;
         this.range = range;
         this.found = found;
     }
 }
 
-
-public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInterface {
+public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationInterface {
     private final Logger logger = LogManager.getLogger();
 
     private Directions direction;
     private Directions echoDirection;
-    private Directions intialDirections;
-    private int returnToIntialPosPhase = 1;
+    private Directions initialDirections;
+    private int returnToInitialPosPhase = 1;
 
     private Integer[] edgePositions = new Integer[4];
     private int edgePosCollected = 0;
@@ -43,23 +42,37 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
     
     private int[] currentPosition = new int[2];
 
-    private echoResults leftEcho = null;
-    private echoResults rightEcho = null;
+    private EchoResults leftEcho = null;
+    private EchoResults rightEcho = null;
     private boolean isEchoing = false;
 
     private boolean finished = false;
 
-    public CreekFindingAlgorithm(String s){
+    public PerimeterMappingAlgorithm(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         String init_heading = info.getString("heading");
         this.direction = Directions.fromString(init_heading);
 
-        intialDirections = direction;
+        initialDirections = direction;
         echoDirection = direction.turn_left();
 
         currentPosition[0] = 0;
         currentPosition[1] = 0;
     }
+
+    public Integer[] perimeterValues() {
+
+        Integer[] perimeterValuesArray =  new Integer[4];
+
+        perimeterValuesArray[0] = edgePositions[0];
+        perimeterValuesArray[1] = edgePositions[1];
+        perimeterValuesArray[2] = edgePositions[2];
+        perimeterValuesArray[3] = edgePositions[3];
+
+        return perimeterValuesArray;
+
+    }
+
 
     @Override
     public boolean isFinished(){
@@ -101,10 +114,10 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
         Found found = this.parseFoundInExtrasResult(extras); // either "GROUND" or "OUT_OF_RANGE" 
 
         if (echoDirection == direction.turn_left()){ // current echo direction is forward
-            leftEcho = new echoResults(echoDirection,range,found);
+            leftEcho = new EchoResults(echoDirection,range,found);
         }
         else if (echoDirection == direction.turn_right()){ // current echo direction is right (final step)
-            rightEcho = new echoResults(echoDirection,range,found);
+            rightEcho = new EchoResults(echoDirection,range,found);
         }
 
     }
@@ -231,13 +244,13 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
         if (edgePosCollected == 4) {
 
-            if (returnToIntialPosPhase == 1){
+            if (returnToInitialPosPhase == 1){
 
-                if (direction != intialDirections.turn_right().turn_right()) {
+                if (direction != initialDirections.turn_right().turn_right()) {
 
                     if ((direction == Directions.N | direction == Directions.S) & Math.abs(currentPosition[1]) == 1) {
 
-                        returnToIntialPosPhase += 1;
+                        returnToInitialPosPhase += 1;
 
                         return this.turnRight();
 
@@ -247,7 +260,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
                     } else if ((direction == Directions.W | direction == Directions.E) & Math.abs(currentPosition[0]) == 1) {
 
-                        returnToIntialPosPhase += 1;
+                        returnToInitialPosPhase += 1;
 
                         return this.turnRight();
 

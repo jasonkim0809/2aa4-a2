@@ -10,13 +10,14 @@ public class Drone {
     private int battery_level;
     private Directions direction;
     private int phase = 0;
-    private final CreekFindingAlgorithm creekFinding;
+    private final PerimeterMappingAlgorithm perimeterMapping;
+    private PerimeterDimensions perimeterDimensions;
 
     public Drone(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         direction = Directions.fromString(info.getString("heading"));
         battery_level = info.getInt("budget");
-        creekFinding = new CreekFindingAlgorithm(s);
+        perimeterMapping = new PerimeterMappingAlgorithm(s);
     }
 
     public JSONObject getDecision(){ // called by explorer class
@@ -24,9 +25,12 @@ public class Drone {
  
         if (phase == 0) {
 
-            decision = creekFinding.findNextStep();
+            decision = perimeterMapping.findNextStep();
 
         } else {
+
+            perimeterDimensions = new PerimeterDimensions(perimeterMapping.perimeterValues()[0], perimeterMapping.perimeterValues()[1], perimeterMapping.perimeterValues()[2], perimeterMapping.perimeterValues()[3]);
+
 
             decision.put("action","stop");
             phase++;
@@ -40,12 +44,12 @@ public class Drone {
     }
 
     public void getResults(JSONObject response){    
-        creekFinding.updateResults(response);
+        perimeterMapping.updateResults(response);
         this.updatePhase();
     }
 
     private void updatePhase(){
-        if (creekFinding.isFinished() && phase == 0){
+        if (perimeterMapping.isFinished() && phase == 0){
             phase++;
         }
     }
