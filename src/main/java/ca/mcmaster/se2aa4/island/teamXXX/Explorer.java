@@ -38,12 +38,17 @@ public class Explorer implements IExplorerRaid {
 
         JSONObject decision = new JSONObject();
 
-        decision = drone.getDecision();
-        
-    
+        if (counter%2 == 0 && drone.phase == 1) {
+            decision.put("action", "scan");
 
-        //decision.put("action", "scan");
+            counter += 1;
+        } else {
 
+            //decision.put("action", "fly");
+            decision = drone.getDecision();
+            counter += 1;
+
+        }
         logger.info("** Decision: {}",decision.toString());
         return decision.toString();
     }

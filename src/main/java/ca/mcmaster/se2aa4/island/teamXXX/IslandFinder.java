@@ -54,14 +54,8 @@ public class IslandFinder {
         return (echo!=null && "GROUND".equals(echo.found));
     }
 
-    public JSONObject findNextStepTest(){
-        JSONObject decision = new JSONObject();
-        JSONObject parameters = new JSONObject();
-
-        parameters.put("direction",direction.turn_right().toString());
-        decision.put("parameters",parameters);
-        decision.put("action","heading");
-        return decision;
+    public Directions getDirection(){
+        return direction;
     }
 
     public JSONObject findNextStep(){
@@ -118,6 +112,7 @@ public class IslandFinder {
                     parameters.put("direction",movedir.toString());
                     decision.put("parameters",parameters);
                     decision.put("action","heading"); // heading action also turns/moves the drone
+                    direction = movedir;
                     facingLand = true;
                 }
                 else{

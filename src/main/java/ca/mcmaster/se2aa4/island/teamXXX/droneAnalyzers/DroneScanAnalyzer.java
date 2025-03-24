@@ -3,7 +3,8 @@ package ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Biome;
-import ca.mcmaster.se2aa4.island.teamXXX.locationClasses.*;
+import ca.mcmaster.se2aa4.island.teamXXX.locationClasses.Creek;
+import ca.mcmaster.se2aa4.island.teamXXX.locationClasses.EmergencySite;
 
 public interface DroneScanAnalyzer extends DroneAnalyzer{
 

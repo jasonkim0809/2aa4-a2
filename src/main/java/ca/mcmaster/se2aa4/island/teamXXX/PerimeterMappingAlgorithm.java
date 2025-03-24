@@ -1,16 +1,12 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 //import static org.junit.Assert.fail;
 
-import static org.junit.Assert.fail;
-
 import java.io.StringReader;
-import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-//import org.json.JSONArray;
 
 import ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers.DroneEchoAnalyzer;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
@@ -76,8 +72,17 @@ public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationI
 
     @Override
     public boolean isFinished(){
-
         return this.finished;
+    }
+
+    public void overrideDirection(Directions d){
+        initialDirections = d;
+        direction = d;
+        echoDirection = direction.turn_left();
+    }
+
+    public String getDirection(){
+        return direction.toString();
     }
 
     @Override
@@ -89,7 +94,6 @@ public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationI
     }
 
     public int parseRangeInExtrasResult(JSONObject extrasResult){
-
 
         return extrasResult.getInt("range");
 
