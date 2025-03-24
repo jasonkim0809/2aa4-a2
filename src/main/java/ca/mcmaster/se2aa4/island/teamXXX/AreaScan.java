@@ -28,7 +28,7 @@ public class AreaScan {
     //gets perimeter values from Drone, which somehow gets them from CreekFind
     //Runs through a minmax heap to get max min vals for x y
     private ArrayList<Integer> checked = new ArrayList<>(); 
-    private Integer[] perimeterEdgePositions = {36,14,-10,-2};
+    private Integer[] perimeterEdgePositions = {36,14,-10,0};
 
     JSONObject decision = new JSONObject();
     JSONObject parameter = new JSONObject();
@@ -42,11 +42,11 @@ public class AreaScan {
     private boolean returnOutwards = false; // if false returns inwards, otherwise outwards
     private boolean onWayBack = false;
 
-    private int lengthOfIsland = 36;
+    private int lengthOfIsland;
 
     private String creeksFound, sitesFound, biomesFound;
-    private int range = 0, scannedLanes = 1;
-    private int turns = 0, returns = 0;
+    private int range = 0, scannedLanes = 0;
+    double smallestToSite = 0;
 
     public AreaScan(/*Directions droneDirection,*/ String s){ // starts off facing where it originaly started
         //this.droneDirection = droneDirection;
@@ -61,14 +61,40 @@ public class AreaScan {
 
         switch(droneDirection){
             case N,S:
-                //lengthOfIsland = Math.abs(perimeterEdgePositions[1]) + Math.abs(perimeterEdgePositions[2]);
+                lengthOfIsland = Math.abs(perimeterEdgePositions[1]) + Math.abs(perimeterEdgePositions[2]);
             case E,W:
-                //lengthOfIsland = Math.abs(perimeterEdgePositions[0]) + Math.abs(perimeterEdgePositions[3]);
+                lengthOfIsland = Math.abs(perimeterEdgePositions[0]) + Math.abs(perimeterEdgePositions[3]);
+        }
+
+        if (dronePosition.getDroneX() == perimeterEdgePositions[1] || dronePosition.getDroneX() == perimeterEdgePositions[2] || dronePosition.getDroneY() == perimeterEdgePositions[0] || dronePosition.getDroneY() == perimeterEdgePositions[3]){
+            if (turningRight == true){
+                turningRight = false;
+            } else{
+                turningRight = true;
+            }
         }
 
     }
 
     public boolean isFinished(){ //goes to next phase
+        for (int i = 0; i < creeks.size()-1; i++){
+
+            int creekX = creeks.get(i).getX();
+            int creekY = creeks.get(i).getY();
+            int siteX = sites.get(0).getX();
+            int siteY = sites.get(0).getY();
+
+            double distanceToSite = Math.sqrt(Math.pow((creekY-siteY),2)+Math.pow((creekX-siteX),2));
+
+            if(distanceToSite < smallestToSite){
+                smallestToSite = distanceToSite;
+            }
+
+            logger.info("site size{}",sites.size());
+            logger.info("site id{}",sites.get(i).getID());
+            logger.info("site X{}",sites.get(i).getX());
+            logger.info("site Y{}",sites.get(i).getY());
+        }
         return this.finished;
     }
 
@@ -89,8 +115,6 @@ public class AreaScan {
     }
 
     public String findNextStep(){
-
-        //logger.info("The drone is facing this plce you know{}", droneDirection);
 
         if (!taskQueue.isEmpty()){
             return taskQueue.remove();
@@ -226,7 +250,6 @@ public class AreaScan {
                     turningRight = true;
                     reset = false;
 
-                    turns++;
                 }
 
             } else if (turningRight == true && reverseTurn == false){
@@ -242,16 +265,13 @@ public class AreaScan {
                     turningRight = false;
                     reset = false;
 
-                    turns++;
                 }
             } else{
                 turnBack(returnOutwards);
                 onWayBack = true;
                 outOfBounds = false;
                 reverseTurn = false;
-                scannedLanes++;
 
-                returns++;
             }
 
         }
@@ -263,8 +283,6 @@ public class AreaScan {
 
         logger.info("SCANNEDLANES{}",scannedLanes);
         logger.info("lengthOfIsland{}",lengthOfIsland);
-        logger.info("turns{}",turns);
-        logger.info("returns{}",returns);
 
         creeksFound = "";
         sitesFound = "";
@@ -304,13 +322,6 @@ public class AreaScan {
         if (!creeksFound.equals("")){
             creeks.add(new PointOfInterest(dronePosition.getDroneX(),dronePosition.getDroneY(),sitesFound));
         }
-
-       /*  for (int i = 0; i < sites.size()-1; i++){
-            logger.info("site size{}",sites.size());
-            logger.info("site id{}",sites.get(i).getID());
-            logger.info("site X{}",sites.get(i).getX());
-            logger.info("site Y{}",sites.get(i).getY());
-        }*/
 
     }
 

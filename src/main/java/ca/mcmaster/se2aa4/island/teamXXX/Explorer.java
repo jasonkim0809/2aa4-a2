@@ -44,8 +44,8 @@ public class Explorer implements IExplorerRaid {
 
         JSONObject decision = new JSONObject();
         JSONObject parameter = new JSONObject();
-
-       /*  if(counter < 1500){
+/* 
+        if(counter < 60){
             logger.info("count");
             counter++;
         } else{
