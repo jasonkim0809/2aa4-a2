@@ -1,42 +1,24 @@
 package ca.mcmaster.se2aa4.island.teamXXX.enums;
 
+import org.json.JSONObject;
+
 public enum Directions {
     N,E,W,S;
     public Directions turn_right(){
-        Directions new_direction = this;
-        switch (new_direction) {
-            case N:
-                new_direction = E;
-                break;
-            case E:
-                new_direction = S;
-                break;
-            case W:
-                new_direction = N;
-                break;
-            case S:
-                new_direction = W;
-                break;
+        return switch (this) {
+            case N -> E;
+            case E -> S;
+            case S -> W;
+            case W -> N;
         };
-        return new_direction;
     }
     public Directions turn_left(){
-        Directions new_direction = this;
-        switch (new_direction) {
-            case N:
-                new_direction = W;
-                break;
-            case E:
-                new_direction = N;
-                break;
-            case W:
-                new_direction = S;
-                break;
-            case S:
-                new_direction = E;
-                break;
+        return switch (this) {
+            case N -> W;
+            case E -> N;
+            case S -> E;
+            case W -> S;
         };
-        return new_direction;
     }
 
     @Override

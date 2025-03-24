@@ -1,9 +1,15 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
+import java.io.StringReader;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Actions;
+import ca.mcmaster.se2aa4.island.teamXXX.AreaScan;
 
 public class Drone {
     private int battery_level;
@@ -11,17 +17,44 @@ public class Drone {
     //private EchoStatus echo = new EchoStatus();
     //private ScanStatus scanInfo;
     private Actions decision;
+    private int xMax;
+    private int yMax;
+    private int xMin;
+    private int yMin;
+    private final AreaScan AreaScan;
+
     private String creek_ID = "";
 
-    public Actions getDecision(){
-        return this.decision;
+    private final Logger logger = LogManager.getLogger();
+
+    public Drone(String s){
+        JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
+        direction = Directions.fromString(info.getString("heading"));
+        battery_level = info.getInt("budget");
+        logger.info("Test4");
+        AreaScan = new AreaScan(s);
+        logger.info("Test5");
     }
+
+    public JSONObject getDecision(){ // called by explorer class
+
+        JSONObject decision = new JSONObject();
+
+        logger.info("RAN A DECISION");
+
+        String decisions = (AreaScan.findNextStep());
+
+        decision = new JSONObject(decisions);
+        
+        //decision = decision.put("action","fly");
+
+        return decision;
+    }
+    
     public String getDirection(){
         return direction.toString();
     }
-    public void getResults(JSONObject in){
 
-    }
     public void echo(String echoDirection){
 
         // echo logic here
@@ -29,6 +62,23 @@ public class Drone {
     public Integer getBattery() {
         return this.battery_level;
     }
+
+    public Integer getXMax() {
+        return this.xMax;
+    }
+
+    public Integer getYMax() {
+        return this.yMax;
+    }
+
+    public Integer getXMin() {
+        return this.xMin;
+    }
+
+    public Integer getYMin() {
+        return this.yMin;
+    }
+
 
     public void setCreekID(String creekID) {
         this.creek_ID = creekID;
@@ -42,42 +92,9 @@ public class Drone {
         return this.creek_ID;
     }
 
-
-/* 
-    public EchoResult getEchoRight() {
-        return echo.echoRight;
+    public void getResults(JSONObject response){  
+        logger.info("GETRESULTS");  
+        AreaScan.updateResults(response);
     }
-
-    public EchoResult getEchoLeft() {
-        return echo.echoLeft;
-    }
-
-    public EchoResult getEchoAhead() {
-        return echo.echoAhead;
-    }
-
-    public Integer getRangeRight() {
-        return echo.rangeRight;
-    }
-
-    public Integer getRangeLeft() {
-        return echo.rangeLeft;
-    }
-
-    public Integer getRangeAhead() {
-        return echo.rangeAhead;
-    }
-
-    public JSONArray getScanInfoCreeks() {
-        return this.scanInfo.scanCreeks;
-    }
-
-    public JSONArray getScanInfoSites() {
-        return this.scanInfo.scanSites;
-    }
-
-    public JSONArray getScanInfoBiomes() {
-        return this.scanInfo.scanBiomes;
-    }*/
     
 }
