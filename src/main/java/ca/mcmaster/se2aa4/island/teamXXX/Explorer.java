@@ -38,7 +38,7 @@ public class Explorer implements IExplorerRaid {
 
         JSONObject decision = new JSONObject();
 
-        if (counter%4 == 0) {
+        if (counter%2 == 0) {
             decision.put("action", "scan");
 
             counter += 1;

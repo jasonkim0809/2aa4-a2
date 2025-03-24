@@ -22,7 +22,15 @@ public class Drone {
     public JSONObject getDecision(){ // called by explorer class
         JSONObject decision = new JSONObject();
  
-        decision = creekFinding.findNextStep();
+        if (phase == 0) {
+
+            decision = creekFinding.findNextStep();
+
+        } else {
+
+            decision.put("action","stop");
+            phase++;
+        }
 
         return decision;
     }

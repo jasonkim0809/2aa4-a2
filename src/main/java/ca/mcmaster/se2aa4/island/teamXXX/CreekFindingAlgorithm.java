@@ -1,11 +1,13 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 //import static org.junit.Assert.fail;
 
+import static org.junit.Assert.fail;
+
 import java.io.StringReader;
 import java.util.ArrayList;
 
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 //import org.json.JSONArray;
@@ -27,45 +29,41 @@ class echoResults{
 
 
 public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInterface {
-    //private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     private Directions direction;
     private Directions echoDirection;
+    private Directions intialDirections;
+    private int returnToIntialPosPhase = 1;
 
-    private ArrayList<int[]> perimeterPositions = new ArrayList<int[]>();
+    private Integer[] edgePositions = new Integer[4];
+    private int edgePosCollected = 0;
+
+    private int isUTurningPhases = 1;
     
-    //establishes Origin Point
     private int[] currentPosition = new int[2];
 
-    private echoResults forwardEcho = null;
+    private echoResults leftEcho = null;
     private echoResults rightEcho = null;
+    private boolean isEchoing = false;
 
     private boolean finished = false;
-
-    private boolean isShiftingRight = false;
-    private int shiftingRightMovementCount = 1;
-
-    private boolean isShiftingLeft = false;
-    private int shiftingLeftMovementCount = 1;
-
-    private int farWayFromLandCount = 0;
-
-    private boolean echoComplete = false;
 
     public CreekFindingAlgorithm(String s){
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         String init_heading = info.getString("heading");
         this.direction = Directions.fromString(init_heading);
 
+        intialDirections = direction;
+        echoDirection = direction.turn_left();
+
         currentPosition[0] = 0;
         currentPosition[1] = 0;
-
-        int[] newPosition= {currentPosition[0], currentPosition[1]};
-        perimeterPositions.add(newPosition);
     }
 
     @Override
     public boolean isFinished(){
+
         return this.finished;
     }
 
@@ -102,13 +100,11 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
         int range = extras.getInt("range");
         Found found = this.parseFoundInExtrasResult(extras); // either "GROUND" or "OUT_OF_RANGE" 
 
-        if (echoDirection == direction){ // current echo direction is forward
-            forwardEcho = new echoResults(echoDirection,range,found);
-            echoDirection = direction.turn_right();
+        if (echoDirection == direction.turn_left()){ // current echo direction is forward
+            leftEcho = new echoResults(echoDirection,range,found);
         }
         else if (echoDirection == direction.turn_right()){ // current echo direction is right (final step)
             rightEcho = new echoResults(echoDirection,range,found);
-            echoDirection = direction.turn_left();
         }
 
     }
@@ -118,339 +114,393 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
         JSONObject decision = new JSONObject();
         JSONObject parameters = new JSONObject();
 
+        if (edgePosCollected == 4 & currentPosition[0] == 0 & currentPosition[1] == 0) {
 
-        if ((currentPosition[0] >= 0) && (currentPosition[0] <= 100) && (currentPosition[1] >= 0) && (currentPosition[1] <= 3) && (perimeterPositions.size() > 10)) {
-
-            this.isFinished();
-
+            finished = true;
         }
 
-        if ((forwardEcho == null) && (rightEcho == null) && (!echoComplete)) { // No scan result
-            //Forward Scan
-            parameters.put("direction",direction.toString());
-            decision.put("parameters",parameters);
-            decision.put("action","echo");
+        if (edgePosCollected == 4) {
 
-            echoDirection = direction;
-            return decision;
+            if (returnToIntialPosPhase == 1){
 
-        } else if ((rightEcho == null) && (!echoComplete)) { // Only have forward scan results
-            //Right Scan
-            parameters.put("direction",direction.turn_right().toString());
-            decision.put("parameters",parameters);
-            decision.put("action","echo");
+                if (direction != intialDirections.turn_right().turn_right()) {
 
-            echoDirection = direction.turn_right();
-            echoComplete = true;
+                    if ((direction == Directions.N | direction == Directions.S) & Math.abs(currentPosition[1]) == 1) {
+
+                        parameters.put("direction",direction.turn_right().toString());
+                        decision.put("parameters",parameters);
+                        decision.put("action","heading");
+        
+                        if (direction == Directions.N) {
+        
+                            currentPosition[0] += 1;
+                            currentPosition[1] += 1;
+    
+                        }else if (direction == Directions.E) {
+        
+                            currentPosition[0] += 1;
+                            currentPosition[1] -= 1;
+    
+                        } else if (direction == Directions.W) {
+        
+                            currentPosition[0] -= 1;
+                            currentPosition[1] += 1;
+                        } else {
+    
+                            currentPosition[0] -= 1;
+                            currentPosition[1] -= 1;
+
+                        }
+
+                        direction = direction.turn_right();
+
+                        returnToIntialPosPhase += 1;
+
+                        return decision;
+
+                    } else if ((direction == Directions.N | direction == Directions.S) & Math.abs(currentPosition[1]) > 1) {
+
+                        decision.put("action","fly");
+
+                        if (direction == Directions.N) {
             
-            return decision;
+                            currentPosition[1] += 1;
+            
+                        } else if (direction == Directions.E) {
+            
+                            currentPosition[0] += 1;
+            
+                        } else if (direction == Directions.W) {
+            
+                            currentPosition[0] -= 1;
+            
+                        } else {
+            
+                            currentPosition[1] -= 1;
+            
+                        }
+                        
+                        return decision;
 
-        } else { //Have Both Scan Results
+                    } else if ((direction == Directions.W | direction == Directions.E) & Math.abs(currentPosition[0]) == 1) {
 
-            if (isShiftingLeft == true && shiftingRightMovementCount != 2 && shiftingRightMovementCount != 5){
-
-                parameters.put("direction",direction.turn_left().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                shiftingRightMovementCount += 1;
-                direction = direction.turn_left();
-
-                return decision;
-
-            } else if (isShiftingLeft == true && shiftingRightMovementCount == 2) {
-
-                decision.put("action","fly");
-
-                shiftingRightMovementCount += 1;
-
-                return decision;
-
-            } else if (isShiftingLeft == true && shiftingRightMovementCount == 5) {
-
-                parameters.put("direction",direction.turn_left().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                shiftingRightMovementCount = 1;
-                direction = direction.turn_left();
-                isShiftingLeft = false;
-
-                echoComplete = false;
-                forwardEcho = null;
-                rightEcho = null;
-
-                return decision;
-            }
-
-
-            if (isShiftingRight == true && shiftingLeftMovementCount != 2 && shiftingLeftMovementCount != 5){
-
-                parameters.put("direction",direction.turn_right().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                shiftingLeftMovementCount += 1;
-                direction = direction.turn_right();
-
-                return decision;
-
-            } else if (isShiftingRight == true && shiftingLeftMovementCount == 2) {
-
-                decision.put("action","fly");
-                shiftingLeftMovementCount += 1;
-
-                return decision;
-
-            } else if (isShiftingRight == true && shiftingLeftMovementCount == 5) {
-
-                parameters.put("direction",direction.turn_right().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                shiftingLeftMovementCount = 1;
-                direction = direction.turn_right();
-                isShiftingRight = false;
-
-                echoComplete = false;
-                forwardEcho = null;
-                rightEcho = null;
-
-                return decision;
-            }
-
-
-            if (forwardEcho.range > 2) { 
-
-                if (rightEcho.range > 2) {
-
-                    if (farWayFromLandCount > 0 & forwardEcho.found == Found.GROUND) {
-
-                        farWayFromLandCount = 0;
-
-                        isShiftingRight = true;
-                        shiftingRightMovementCount += 1;
-    
                         parameters.put("direction",direction.turn_right().toString());
                         decision.put("parameters",parameters);
                         decision.put("action","heading");
+        
+                        if (direction == Directions.N) {
+        
+                            currentPosition[0] += 1;
+                            currentPosition[1] += 1;
     
+                        }else if (direction == Directions.E) {
+        
+                            currentPosition[0] += 1;
+                            currentPosition[1] -= 1;
     
-                        if (direction == Directions.E) {
-    
-                            currentPosition[1] -= 10;
+                        } else if (direction == Directions.W) {
         
-                        } else if (direction == Directions.N) {
-        
-                            currentPosition[0] += 10;
-        
-        
-                        } else if (direction == Directions.S) {
-        
-                            currentPosition[0] -= 10;
-        
+                            currentPosition[0] -= 1;
+                            currentPosition[1] += 1;
                         } else {
-        
-                            currentPosition[1] += 10;
-        
-                        }
     
-                        direction = direction.turn_right();
-    
-                        int[] newPosition= {currentPosition[0], currentPosition[1]};
-                        perimeterPositions.add(newPosition);
-    
+                            currentPosition[0] -= 1;
+                            currentPosition[1] -= 1;
 
-                    } else {
-
-                        farWayFromLandCount += 1;
-                    
-                        parameters.put("direction",direction.turn_right().toString());
-                        decision.put("parameters",parameters);
-                        decision.put("action","heading");
-
-                        if (direction == Directions.E) {
-
-                            currentPosition[0] += 10;
-                            currentPosition[1] -= 10;
-        
-                        } else if (direction == Directions.N) {
-        
-                            currentPosition[0] += 10;
-                            currentPosition[1] += 10;
-        
-        
-                        } else if (direction == Directions.S) {
-        
-                            currentPosition[0] -= 10;
-                            currentPosition[1] -= 10;
-        
-                        } else {
-        
-                            currentPosition[0] -= 10;
-                            currentPosition[1] += 10;
-        
                         }
 
-                        echoComplete = false;
-                        forwardEcho = null;
-                        rightEcho = null;
                         direction = direction.turn_right();
 
-                        int[] newPosition= {currentPosition[0], currentPosition[1]};
-                        perimeterPositions.add(newPosition);
+                        returnToIntialPosPhase += 1;
+
+                        return decision;
+
+                    } else if ((direction == Directions.W | direction == Directions.E) & Math.abs(currentPosition[0]) > 1) {
+
+                        decision.put("action","fly");
+
+                        if (direction == Directions.N) {
+            
+                            currentPosition[1] += 1;
+            
+                        } else if (direction == Directions.E) {
+            
+                            currentPosition[0] += 1;
+            
+                        } else if (direction == Directions.W) {
+            
+                            currentPosition[0] -= 1;
+            
+                        } else {
+            
+                            currentPosition[1] -= 1;
+            
+                        }
+                        
+                        return decision;
 
                     }
 
-                    
-                } else if (rightEcho.range == 0) {
-
-                    farWayFromLandCount = 0;
-
-                    isShiftingLeft = true;
-                    shiftingLeftMovementCount += 1;
-
-                    parameters.put("direction",direction.turn_left().toString());
-                    decision.put("parameters",parameters);
-                    decision.put("action","heading");
-
-                    
-                    if (direction == Directions.E) {
-
-                        currentPosition[1] += 10;
-    
-                    } else if (direction == Directions.N) {
-    
-                        currentPosition[0] -= 10;
-    
-    
-                    } else if (direction == Directions.S) {
-    
-                        currentPosition[0] += 10;
-    
-                    } else {
-    
-                        currentPosition[1] -= 10;
-    
-                    }
-
-                    direction = direction.turn_left();
-
-                    int[] newPosition= {currentPosition[0], currentPosition[1]};
-                    perimeterPositions.add(newPosition);
-
-
-                } else if (rightEcho.range > 1) {
-
-                    farWayFromLandCount = 0;
-
-                    isShiftingRight = true;
-                    shiftingRightMovementCount += 1;
+                } else {
 
                     parameters.put("direction",direction.turn_right().toString());
                     decision.put("parameters",parameters);
                     decision.put("action","heading");
 
+                    if (direction == Directions.N) {
 
-                    if (direction == Directions.E) {
+                        currentPosition[0] += 1;
+                        currentPosition[1] += 1;
 
-                        currentPosition[1] -= 10;
-    
-                    } else if (direction == Directions.N) {
-    
-                        currentPosition[0] += 10;
-    
-    
-                    } else if (direction == Directions.S) {
-    
-                        currentPosition[0] -= 10;
-    
+                    }else if (direction == Directions.E) {
+
+                        currentPosition[0] += 1;
+                        currentPosition[1] -= 1;
+
+                    } else if (direction == Directions.W) {
+
+                        currentPosition[0] -= 1;
+                        currentPosition[1] += 1;
+
+
                     } else {
-    
-                        currentPosition[1] += 10;
-    
+
+                        currentPosition[0] -= 1;
+                        currentPosition[1] -= 1;
+
                     }
 
                     direction = direction.turn_right();
+                    
+                    return decision;
 
-                    int[] newPosition= {currentPosition[0], currentPosition[1]};
-                    perimeterPositions.add(newPosition);
-
-                } else {
-
-                    farWayFromLandCount = 0;
-
-                    decision.put("action","fly");
-
-                    if (direction == Directions.E) {
-
-                        currentPosition[0] += 10;
-    
-                    } else if (direction == Directions.N) {
-    
-                        currentPosition[1] += 10;
-    
-    
-                    } else if (direction == Directions.S) {
-    
-                        currentPosition[1] -= 10;
-    
-                    } else {
-    
-                        currentPosition[0] -= 10;
-    
-                    }
-
-                    echoComplete = false;
-                    forwardEcho = null;
-                    rightEcho = null;
-
-                    int[] newPosition= {currentPosition[0], currentPosition[1]};
-                    perimeterPositions.add(newPosition);
                 }
 
             } else {
 
-                farWayFromLandCount = 0;                
+                decision.put("action","fly");
 
-                isShiftingLeft = true;
-                shiftingLeftMovementCount += 1;
-
-                parameters.put("direction",direction.turn_left().toString());
-                decision.put("parameters",parameters);
-                decision.put("action","heading");
-
-                
-                if (direction == Directions.E) {
-
-                    currentPosition[1] += 10;
-
-                } else if (direction == Directions.N) {
-
-                    currentPosition[0] -= 10;
-
-
-                } else if (direction == Directions.S) {
-
-                    currentPosition[0] += 10;
-
+                if (direction == Directions.N) {
+    
+                    currentPosition[1] += 1;
+    
+                } else if (direction == Directions.E) {
+    
+                    currentPosition[0] += 1;
+    
+                } else if (direction == Directions.W) {
+    
+                    currentPosition[0] -= 1;
+    
                 } else {
-
-                    currentPosition[1] -= 10;
-
+    
+                    currentPosition[1] -= 1;
+    
                 }
-
-                direction = direction.turn_left();
-
-                int[] newPosition= {currentPosition[0], currentPosition[1]};
-                perimeterPositions.add(newPosition);
-
+                
+                return decision;
 
             }
+            
+
+        }
+
+        if (isUTurningPhases == 2) {
+
+            isUTurningPhases = 3;
+
+            parameters.put("direction",direction.turn_right().toString());
+            decision.put("parameters",parameters);
+            decision.put("action","heading");
+
+            if (direction == Directions.N) {
+
+                edgePositions[0] = currentPosition[1];
+
+                currentPosition[0] += 1;
+                currentPosition[1] += 1;
+
+            }else if (direction == Directions.E) {
+
+                edgePositions[1] = currentPosition[0];
+
+                currentPosition[0] += 1;
+                currentPosition[1] -= 1;
+
+            } else if (direction == Directions.W) {
+
+                edgePositions[2] = currentPosition[0];
+
+                currentPosition[0] -= 1;
+                currentPosition[1] += 1;
+
+
+            } else {
+
+                edgePositions[3] = currentPosition[0];
+
+                currentPosition[0] -= 1;
+                currentPosition[1] -= 1;
+
+            }
+
+            direction = direction.turn_right();
+            echoDirection = direction.turn_left();
+
+            return decision;
+
+        } else if (isUTurningPhases == 3) {
+
+            isUTurningPhases = 1;
+
+            decision.put("action","fly");
+
+            if (direction == Directions.N) {
+
+                currentPosition[1] += 1;
+
+            } else if (direction == Directions.E) {
+
+                currentPosition[0] += 1;
+
+            } else if (direction == Directions.W) {
+
+                currentPosition[0] -= 1;
+
+            } else {
+
+                currentPosition[1] -= 1;
+
+            }
+
+            isEchoing = true;
 
             return decision;
 
         }
+
+        if (isEchoing == true & echoDirection == direction.turn_left()) {
+
+            parameters.put("direction",direction.turn_left().toString());
+            decision.put("parameters",parameters);
+            decision.put("action","echo");
+
+            echoDirection = direction.turn_right();
+
+        } else if (isEchoing == true & echoDirection == direction.turn_right()) {
+
+            parameters.put("direction",direction.turn_right().toString());
+            decision.put("parameters",parameters);
+            decision.put("action","echo");
+
+            isEchoing = false;
+            echoDirection = direction.turn_left();
+
+        } else {
+            if (leftEcho == null && rightEcho == null ) {
+
+                decision.put("action","fly");
+
+                if (direction == Directions.N) {
+
+                    currentPosition[1] += 1;
+
+                } else if (direction == Directions.E) {
+
+                    currentPosition[0] += 1;
+
+                } else if (direction == Directions.W) {
+
+                    currentPosition[0] -= 1;
+
+                } else {
+
+                    currentPosition[1] -= 1;
+
+                }
+
+                isEchoing = true;
+
+            } else if (leftEcho.found == Found.GROUND | rightEcho.found == Found.GROUND) {
+
+                decision.put("action","fly");
+
+                if (direction == Directions.N) {
+
+                    currentPosition[1] += 1;
+
+                } else if (direction == Directions.E) {
+
+                    currentPosition[0] += 1;
+
+                } else if (direction == Directions.W) {
+
+                    currentPosition[0] -= 1;
+
+                } else {
+
+                    currentPosition[1] -= 1;
+
+                }
+
+                isEchoing = true;
+
+            } else {
+
+                if (edgePosCollected % 2 == 0) {
+
+                    isUTurningPhases = 2;
+
+                } else {
+
+                    isEchoing = true;
+
+                }
+
+                edgePosCollected += 1;
+
+                parameters.put("direction",direction.turn_right().toString());
+                decision.put("parameters",parameters);
+                decision.put("action","heading");
+
+                if (direction == Directions.N) {
+
+                    edgePositions[0] = currentPosition[1];
+
+                    currentPosition[0] += 1;
+                    currentPosition[1] += 1;
+
+                }else if (direction == Directions.E) {
+
+                    edgePositions[1] = currentPosition[0];
+
+                    currentPosition[0] += 1;
+                    currentPosition[1] -= 1;
+
+                } else if (direction == Directions.W) {
+
+                    edgePositions[2] = currentPosition[0];
+
+                    currentPosition[0] -= 1;
+                    currentPosition[1] += 1;
+
+
+                } else {
+
+                    edgePositions[3] = currentPosition[0];
+
+                    currentPosition[0] -= 1;
+                    currentPosition[1] -= 1;
+
+                }
+
+                direction = direction.turn_right();
+                echoDirection = direction.turn_left();
+            }
+
+        }
+
+        return decision;
 
     }
 
