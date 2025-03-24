@@ -9,7 +9,7 @@ public class EmergencySite extends TargetLocations {
 
         this.id = id;
         this.position[0] = creekXPosition;
-        this.position[0] = creekYPosition;
+        this.position[1] = creekYPosition;
 
     }
 
