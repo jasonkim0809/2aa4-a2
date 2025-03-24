@@ -2,14 +2,13 @@ package ca.mcmaster.se2aa4.island.teamXXX;
 //import static org.junit.Assert.fail;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 //import org.json.JSONArray;
-
-import java.util.ArrayList; 
 
 import ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers.DroneEchoAnalyzer;
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
@@ -48,6 +47,8 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
     private boolean isShiftingLeft = false;
     private int shiftingLeftMovementCount = 1;
+
+    private int farWayFromLandCount = 0;
 
     private boolean echoComplete = false;
 
@@ -118,7 +119,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
         JSONObject parameters = new JSONObject();
 
 
-        if ((currentPosition[0] >= 0) && (currentPosition[0] <= 3) && (currentPosition[1] >= 0) && (currentPosition[1] <= 3) && (perimeterPositions.size() > 30)) {
+        if ((currentPosition[0] >= 0) && (currentPosition[0] <= 100) && (currentPosition[1] >= 0) && (currentPosition[1] <= 3) && (perimeterPositions.size() > 10)) {
 
             this.isFinished();
 
@@ -153,6 +154,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                 decision.put("action","heading");
 
                 shiftingRightMovementCount += 1;
+                direction = direction.turn_left();
 
                 return decision;
 
@@ -171,6 +173,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                 decision.put("action","heading");
 
                 shiftingRightMovementCount = 1;
+                direction = direction.turn_left();
                 isShiftingLeft = false;
 
                 echoComplete = false;
@@ -188,6 +191,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                 decision.put("action","heading");
 
                 shiftingLeftMovementCount += 1;
+                direction = direction.turn_right();
 
                 return decision;
 
@@ -205,6 +209,7 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                 decision.put("action","heading");
 
                 shiftingLeftMovementCount = 1;
+                direction = direction.turn_right();
                 isShiftingRight = false;
 
                 echoComplete = false;
@@ -217,43 +222,90 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
             if (forwardEcho.range > 2) { 
 
-                if (rightEcho.range > 1) {
+                if (rightEcho.range > 2) {
 
-                    parameters.put("direction",direction.turn_right().toString());
-                    decision.put("parameters",parameters);
-                    decision.put("action","heading");
+                    if (farWayFromLandCount > 0 & forwardEcho.found == Found.GROUND) {
 
-                    if (direction == Directions.E) {
+                        farWayFromLandCount = 0;
 
-                        currentPosition[0] += 10;
-                        currentPosition[1] -= 10;
+                        isShiftingRight = true;
+                        shiftingRightMovementCount += 1;
     
-                    } else if (direction == Directions.N) {
+                        parameters.put("direction",direction.turn_right().toString());
+                        decision.put("parameters",parameters);
+                        decision.put("action","heading");
     
-                        currentPosition[0] += 10;
-                        currentPosition[1] += 10;
     
+                        if (direction == Directions.E) {
     
-                    } else if (direction == Directions.S) {
+                            currentPosition[1] -= 10;
+        
+                        } else if (direction == Directions.N) {
+        
+                            currentPosition[0] += 10;
+        
+        
+                        } else if (direction == Directions.S) {
+        
+                            currentPosition[0] -= 10;
+        
+                        } else {
+        
+                            currentPosition[1] += 10;
+        
+                        }
     
-                        currentPosition[0] -= 10;
-                        currentPosition[1] -= 10;
+                        direction = direction.turn_right();
     
+                        int[] newPosition= {currentPosition[0], currentPosition[1]};
+                        perimeterPositions.add(newPosition);
+    
+
                     } else {
-    
-                        currentPosition[0] -= 10;
-                        currentPosition[1] += 10;
-    
+
+                        farWayFromLandCount += 1;
+                    
+                        parameters.put("direction",direction.turn_right().toString());
+                        decision.put("parameters",parameters);
+                        decision.put("action","heading");
+
+                        if (direction == Directions.E) {
+
+                            currentPosition[0] += 10;
+                            currentPosition[1] -= 10;
+        
+                        } else if (direction == Directions.N) {
+        
+                            currentPosition[0] += 10;
+                            currentPosition[1] += 10;
+        
+        
+                        } else if (direction == Directions.S) {
+        
+                            currentPosition[0] -= 10;
+                            currentPosition[1] -= 10;
+        
+                        } else {
+        
+                            currentPosition[0] -= 10;
+                            currentPosition[1] += 10;
+        
+                        }
+
+                        echoComplete = false;
+                        forwardEcho = null;
+                        rightEcho = null;
+                        direction = direction.turn_right();
+
+                        int[] newPosition= {currentPosition[0], currentPosition[1]};
+                        perimeterPositions.add(newPosition);
+
                     }
 
-                    echoComplete = false;
-                    forwardEcho = null;
-                    rightEcho = null;
-
-                    int[] newPosition= {currentPosition[0], currentPosition[1]};
-                    perimeterPositions.add(newPosition);
-
+                    
                 } else if (rightEcho.range == 0) {
+
+                    farWayFromLandCount = 0;
 
                     isShiftingLeft = true;
                     shiftingLeftMovementCount += 1;
@@ -281,11 +333,16 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                         currentPosition[1] -= 10;
     
                     }
+
+                    direction = direction.turn_left();
+
                     int[] newPosition= {currentPosition[0], currentPosition[1]};
                     perimeterPositions.add(newPosition);
 
 
-                } else if (rightEcho.range == 2) {
+                } else if (rightEcho.range > 1) {
+
+                    farWayFromLandCount = 0;
 
                     isShiftingRight = true;
                     shiftingRightMovementCount += 1;
@@ -313,10 +370,16 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
                         currentPosition[1] += 10;
     
                     }
+
+                    direction = direction.turn_right();
+
                     int[] newPosition= {currentPosition[0], currentPosition[1]};
                     perimeterPositions.add(newPosition);
 
                 } else {
+
+                    farWayFromLandCount = 0;
+
                     decision.put("action","fly");
 
                     if (direction == Directions.E) {
@@ -348,39 +411,40 @@ public class CreekFindingAlgorithm implements DroneEchoAnalyzer, NavigationInter
 
             } else {
 
+                farWayFromLandCount = 0;                
+
+                isShiftingLeft = true;
+                shiftingLeftMovementCount += 1;
+
                 parameters.put("direction",direction.turn_left().toString());
                 decision.put("parameters",parameters);
                 decision.put("action","heading");
 
+                
                 if (direction == Directions.E) {
 
-                    currentPosition[0] += 10;
                     currentPosition[1] += 10;
 
                 } else if (direction == Directions.N) {
 
                     currentPosition[0] -= 10;
-                    currentPosition[1] += 10;
 
 
                 } else if (direction == Directions.S) {
 
                     currentPosition[0] += 10;
-                    currentPosition[1] -= 10;
 
                 } else {
 
-                    currentPosition[0] -= 10;
                     currentPosition[1] -= 10;
 
                 }
 
-                echoComplete = false;
-                forwardEcho = null;
-                rightEcho = null;
+                direction = direction.turn_left();
 
                 int[] newPosition= {currentPosition[0], currentPosition[1]};
-                    perimeterPositions.add(newPosition);
+                perimeterPositions.add(newPosition);
+
 
             }
 
