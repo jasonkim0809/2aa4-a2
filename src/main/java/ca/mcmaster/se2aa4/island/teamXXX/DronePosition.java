@@ -1,8 +1,12 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 public class DronePosition {
+    private final Logger logger = LogManager.getLogger();
 
     private int droneX, droneY;
 
@@ -32,20 +36,20 @@ public class DronePosition {
     private void updateAfterRT(Directions droneDirection) {
         switch (droneDirection){
             case N -> {
-                decreaseDroneX();
+                increaseDroneX();
                 increaseDroneY();
             }
             case E -> {
                 increaseDroneX();
-                increaseDroneY();
+                decreaseDroneY();
             }
             case S -> {
-                increaseDroneX();
+                decreaseDroneX();
                 decreaseDroneY();
             }
             case W -> {
                 decreaseDroneX();
-                decreaseDroneY();
+                increaseDroneY();
             }
         }
     }
@@ -53,20 +57,20 @@ public class DronePosition {
     private void updateAfterLT(Directions droneDirection) {
         switch (droneDirection){
             case N -> {
-                increaseDroneX();
+                decreaseDroneX();
                 increaseDroneY();
             }
             case E -> {
                 increaseDroneX();
-                decreaseDroneY();
+                increaseDroneY();
             }
             case S -> {
-                decreaseDroneX();
+                increaseDroneX();
                 decreaseDroneY();
             }
             case W -> {
                 decreaseDroneX();
-                increaseDroneY();
+                decreaseDroneY();
             }
         }
     }

@@ -31,16 +31,12 @@ public class Drone {
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         direction = Directions.fromString(info.getString("heading"));
         battery_level = info.getInt("budget");
-        logger.info("Test4");
         AreaScan = new AreaScan(s);
-        logger.info("Test5");
     }
 
     public JSONObject getDecision(){ // called by explorer class
 
         JSONObject decision = new JSONObject();
-
-        logger.info("RAN A DECISION");
 
         String decisions = (AreaScan.findNextStep());
 
@@ -93,7 +89,6 @@ public class Drone {
     }
 
     public void getResults(JSONObject response){  
-        logger.info("GETRESULTS");  
         AreaScan.updateResults(response);
     }
     

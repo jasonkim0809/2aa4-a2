@@ -45,19 +45,20 @@ public class Explorer implements IExplorerRaid {
         JSONObject decision = new JSONObject();
         JSONObject parameter = new JSONObject();
 
-        if(counter < 40){
+       /*  if(counter < 1500){
             logger.info("count");
             counter++;
         } else{
             logger.info("THIS IS THE END");
             return decision.put("action","put").toString();
-        }
+        }*/
 
         decision = drone.getDecision();
         //decision = decision.put("action","stop");
         logger.info("** Decision: {}",decision.toString());
 
         return decision.toString();
+        
 
         /* 
         //decision = drone.getDecision();

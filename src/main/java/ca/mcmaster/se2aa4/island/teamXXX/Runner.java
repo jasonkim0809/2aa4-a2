@@ -12,8 +12,8 @@ public class Runner {
             run(Explorer.class) // each tile is a 4x4 square?????
                     .exploring(new File(filename))
                     .withSeed(42L)
-                    .startingAt(73,68, "NORTH")
-                    .backBefore(7000)
+                    .startingAt(73,133, "WEST")
+                    .backBefore(999999)
                     .withCrew(5)
                     .collecting(1000, "WOOD")
                     .storingInto("./outputs")

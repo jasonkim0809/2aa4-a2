@@ -13,6 +13,7 @@ import ca.mcmaster.se2aa4.island.teamXXX.Drone;
 import ca.mcmaster.se2aa4.island.teamXXX.DronePosition;
 
 import java.util.*;
+import java.lang.Math;
 
 public class AreaScan {
     private final Logger logger = LogManager.getLogger();
@@ -26,24 +27,26 @@ public class AreaScan {
 
     //gets perimeter values from Drone, which somehow gets them from CreekFind
     //Runs through a minmax heap to get max min vals for x y
-    private int[][] evenMap = {{-2,-1,0,1,2},{6,7,9,12,13}};
-    private int[][] oddMap = {{75,74,73,75,74,73},{75,75,75,65,65,65}};
-    private ArrayList<Integer> checked = new ArrayList<>();
+    private ArrayList<Integer> checked = new ArrayList<>(); 
+    private Integer[] perimeterEdgePositions = {36,14,-10,-2};
 
     JSONObject decision = new JSONObject();
     JSONObject parameter = new JSONObject();
     
     private boolean reverseTurn = false;
-    private boolean mainCoordY = false; // false is X
-    private boolean turningRight = false; //false is left
+    private boolean turningRight = true; //false is left
     private boolean finished = false;
     private boolean outOfBounds = false;
-    private boolean onWater = false;
-    private boolean isEvenLength = false;
+    private boolean onOcean = false;
+    private boolean reset = false;
+    private boolean returnOutwards = false; // if false returns inwards, otherwise outwards
+    private boolean onWayBack = false;
+
+    private int lengthOfIsland = 36;
 
     private String creeksFound, sitesFound, biomesFound;
-    private int range = 0;
-    private int max = 0, min = 0;
+    private int range = 0, scannedLanes = 1;
+    private int turns = 0, returns = 0;
 
     public AreaScan(/*Directions droneDirection,*/ String s){ // starts off facing where it originaly started
         //this.droneDirection = droneDirection;
@@ -55,17 +58,12 @@ public class AreaScan {
         String init_heading = info.getString("heading");
         this.droneDirection = Directions.fromString(init_heading);
         logger.info("Initial heading: {}",droneDirection.toString());
-        switch (droneDirection) {
-            case E, W -> {
-                mainCoordY = false;
-                max = maxCoord(evenMap[0]);
-                min = minCoord(evenMap[0]);
-            }
-            case S, N -> {
-                mainCoordY = true;
-                max = maxCoord(evenMap[1]);
-                min = minCoord(evenMap[1]);
-            }
+
+        switch(droneDirection){
+            case N,S:
+                //lengthOfIsland = Math.abs(perimeterEdgePositions[1]) + Math.abs(perimeterEdgePositions[2]);
+            case E,W:
+                //lengthOfIsland = Math.abs(perimeterEdgePositions[0]) + Math.abs(perimeterEdgePositions[3]);
         }
 
     }
@@ -97,163 +95,186 @@ public class AreaScan {
         if (!taskQueue.isEmpty()){
             return taskQueue.remove();
         }
+        
 
-        if ( onWater == false ){
-            //logger.info("The drone is facing this way bum{}", droneDirection);
+        logger.info("onWater{}",onOcean);
+        logger.info("outOfBounds{}",outOfBounds);
+        logger.info("range{}",range);
+        logger.info("turningRight{}",turningRight);
+        logger.info("droneDirection{}",droneDirection);
+        logger.info("droneY{}",dronePosition.getDroneY());
+        logger.info("droneX{}",dronePosition.getDroneX());
+        logger.info("reverseTurn{}",reverseTurn);
+        logger.info("returnOutwards{}",returnOutwards);
+        logger.info("reset{}",reset);
+        logger.info("onWayBack{}",onWayBack);
+
+
+        if ( onOcean == false ){
             linearScan();
+            if(dronePosition.getDroneY() > perimeterEdgePositions[3]+1 && dronePosition.getDroneY() < perimeterEdgePositions[1]-1 && dronePosition.getDroneX() > perimeterEdgePositions[2]+1 && dronePosition.getDroneX() < perimeterEdgePositions[0]-1){
+                onWayBack = false;
+            }
         } else if (outOfBounds == false){
-            if (range == 0){
-                linearScan();
-                echoForward();
-            } else{
-                linearScan();
+            linearScan();
+            echoForward();
+        } else {
+            logger.info("HELPME");
+            if(onWayBack == false){
+                switch(droneDirection){
+                    case E:
+    
+                        
+                        if (dronePosition.getDroneY() == perimeterEdgePositions[0]-1){ //lowest point
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO1");
+    
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[0]){
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO1");
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]+1){ //lowest point
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO1");
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]){
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO1");
+                        }
+                        break;
+                    
+                    case W:
+                        if (dronePosition.getDroneY() == perimeterEdgePositions[0]-1){ //lowest point
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO2A");
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[0]){
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO2B");
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]+1){ //lowest point
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO2C");
+                        } else if (dronePosition.getDroneY() == perimeterEdgePositions[3]){
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO2D");
+                        }
+                        
+                        break;
+                    case N:
+                        if (dronePosition.getDroneX() == perimeterEdgePositions[1]-1){ //lowest point
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO3");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]){
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO3");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]+1){ //lowest point
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO3");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]){
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO3");
+                        }   
+                        
+                        break;
+                    case S:
+                        if (dronePosition.getDroneX() == perimeterEdgePositions[2]+1){ //lowest point
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO4");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[2]){
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO4");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]-1){ //lowest point
+                            returnOutwards = false;
+                            reverseTurn = true;
+                            logger.info("HELLO4");
+                        } else if (dronePosition.getDroneX() == perimeterEdgePositions[1]){
+                            returnOutwards = true;
+                            reverseTurn = true;
+                            logger.info("HELLO4");
+                        }
+    
+                        break;
+                }
+
             }
             
-        } else {
-            logger.info("START TURN");
-            if(checked.size()%2 == 0){
-                isEvenLength = true;
-            }else{
-                isEvenLength = false;
+            if (reset == false && reverseTurn == false){
+                range = 0;
+                reset = true;
             }
-
-            switch (droneDirection) {
-                case E -> {
-                    if(dronePosition.getDroneX() >= max){
-                        reverseTurn = true;
-                    }
-                }
-                case W -> {
-                    if(dronePosition.getDroneX() <= min){
-                        reverseTurn = true;
-                    }
-                }
-                case N -> {
-                    if(dronePosition.getDroneY() >= max){
-                        reverseTurn = true;
-                    }
-                }
-                case S -> {
-                    if(dronePosition.getDroneY() <= min){
-                        reverseTurn = true;
-                    }
-                }
-            }
-
-            int reach;
             if (turningRight == false && reverseTurn == false){
-                if (mainCoordY == false){
-                    reach = findIndex(evenMap[1],evenMap[0],dronePosition.getDroneY(),dronePosition.getDroneX()-1);
-                    switch (droneDirection) {
-                        case E -> {
-                            reach = reach - 2;
-                        }
-                        case W -> {
-                            reach = reach + 2;
-                        }
-                    }
-                    range = evenMap[1][reach] - dronePosition.getDroneY() + 1;
+                if (range <= 2){
+                    echoLeft();
+                    fly();
                 } else{
-                    logger.info("YOU MADE IT!!!!!");
-                    logger.info("droneY{}",dronePosition.getDroneY());
-                    logger.info("droneX{}",dronePosition.getDroneX());
-                    reach = findIndex(evenMap[0],evenMap[1],dronePosition.getDroneX(),dronePosition.getDroneY()-1);
-                    logger.info("This is the REACH{}",reach);
-                    
-                    switch (droneDirection) {
-                        case S -> {
-                            reach = reach - 2;
-                        }
-                        case N -> {
-                            reach = reach + 2;
-                        }
-                    }
-                    range = evenMap[0][reach] - dronePosition.getDroneX() + 1;
-                    logger.info("This is the NEW RANGE{}",range);
-                }
-
-                turningRight = true;
-
-                if ( range > 0 ){
-                    linearScan();
-                }else{
+                    turnLeft();
+                    turnLeft();
+                    scannedLanes++;
                     range = 0;
-                    logger.info("CONGRATULATIONS ITS ALL OVER");
-                    turnLeft();
-                    turnLeft();
                     outOfBounds = false;
+                    turningRight = true;
+                    reset = false;
+
+                    turns++;
                 }
-                
-                checked.add(evenMap[0][reach]); //checked always +1 to account for starting line
+
             } else if (turningRight == true && reverseTurn == false){
-                //needs fixing, doesnt always turn right on comeback
-                if (mainCoordY == false){
-                    reach = findIndex(evenMap[1],evenMap[0],dronePosition.getDroneY(),dronePosition.getDroneX()-1);
-                    switch (droneDirection) {
-                        case E -> {
-                            reach = reach - 2;
-                        }
-                        case W -> {
-                            reach = reach + 2;
-                        }
-                    }
-                    range = evenMap[1][reach] - dronePosition.getDroneY() + 1;
+                if (range <= 2){
+                    echoRight();
+                    fly();
                 } else{
-                    
-                    reach = findIndex(evenMap[0],evenMap[1],dronePosition.getDroneX(),dronePosition.getDroneY()-1);
-
-                    logger.info("THIS IS IT!!!!!!{}", reach);
-                    switch (droneDirection) {
-                        case S -> {
-                            reach = reach + 2;
-                        }
-                        case N -> {
-                            reach = reach - 2;
-                        }
-                    }
-                    range = evenMap[0][reach] - dronePosition.getDroneX() + 1;
-                }
-
-                turningRight = false;
-
-                if ( range > 0 ){
-                    linearScan();
-                }else{
+                    turnRight();
+                    turnRight();
+                    scannedLanes++;
                     range = 0;
-                    turnRight();
-                    turnRight();
                     outOfBounds = false;
-                }
+                    turningRight = false;
+                    reset = false;
 
-                checked.add(evenMap[0][reach]); //checked always +1 to account for starting line
-            } else {
-                if(isEvenLength == true){
-                    turnBack(true);
-                    isEvenLength = false;
-                } else{
-                    turnBack(false);
-                    isEvenLength = false;
+                    turns++;
                 }
+            } else{
+                turnBack(returnOutwards);
+                onWayBack = true;
+                outOfBounds = false;
+                reverseTurn = false;
+                scannedLanes++;
 
+                returns++;
             }
+
         }
 
-        if ((evenMap[0]).length == (checked.size()+1)){
+        if(lengthOfIsland == scannedLanes){
             this.taskQueue.add(decision.put("action", "stop").toString());
+            isFinished();
         }
+
+        logger.info("SCANNEDLANES{}",scannedLanes);
+        logger.info("lengthOfIsland{}",lengthOfIsland);
+        logger.info("turns{}",turns);
+        logger.info("returns{}",returns);
 
         creeksFound = "";
         sitesFound = "";
         biomesFound = "";
-
-        //logger.info("end{}", droneDirection);
 
         return taskQueue.remove();
     }
 
     public void updateResults(JSONObject response){
         JSONObject extras = response.getJSONObject("extras");
-        logger.info("GETSHERE");
 
         if (!extras.has("found") && !extras.has("biomes")) { // check results JSON if an echo was even used
             return; 
@@ -263,19 +284,17 @@ public class AreaScan {
             sitesFound = extras.getJSONArray("sites").toString();
             biomesFound = extras.getJSONArray("biomes").toString();
 
-            logger.info("CHECKPOINTS");
-
-            if (biomesFound.equals("[\"LAKE\"]") || biomesFound.equals("[\"OCEAN\"]")){
-                logger.info("CHECKPOINTS2");
-                onWater = true;
+            if (biomesFound.equals("[\"OCEAN\"]")){
+                onOcean = true;
             } else{
-                onWater = false;
+                onOcean = false;
             }
 
         } else{
             range = extras.getInt("range"); 
-            outOfBounds = isOcean(extras.getString("found"));
-            logger.info("range{}",range>0);
+            if (outOfBounds == false){
+                outOfBounds = isOcean(extras.getString("found"));
+            }
         }
 
         if (!sitesFound.equals("")){
@@ -286,56 +305,13 @@ public class AreaScan {
             creeks.add(new PointOfInterest(dronePosition.getDroneX(),dronePosition.getDroneY(),sitesFound));
         }
 
-    }
-    //if main coordY than x would be mainCoord searched for here
-    public int findIndex(int[] mainCoord, int[] secondaryCoord, int mainTarget, int secondaryTarget) {
-        logger.info("Why Is there more");
-        ArrayList<Integer> indexes = new ArrayList<>();
-        for (int i = 0; i < mainCoord.length; i++) {
-            if (mainCoord[i] == mainTarget) {
-                indexes.add(i);
-            }
-        }
-        logger.info("we good?");
-        logger.info("This is the REACH{}",indexes.get(0));
-        //logger.info("This is the REACH",secondaryCoord[Integer.valueOf(indexes.get(1))]);
+       /*  for (int i = 0; i < sites.size()-1; i++){
+            logger.info("site size{}",sites.size());
+            logger.info("site id{}",sites.get(i).getID());
+            logger.info("site X{}",sites.get(i).getX());
+            logger.info("site Y{}",sites.get(i).getY());
+        }*/
 
-        if(indexes.size()==1){
-            return indexes.get(0);
-        }
-        logger.info("This is the 2REACH{}",indexes.get(0));
-        if (secondaryCoord[indexes.get(0)] > secondaryCoord[indexes.get(1)]){
-            if (secondaryTarget > secondaryCoord[indexes.get(0)]){
-                return indexes.get(0);
-            }else{
-                return indexes.get(1);
-            }
-        } else{
-            if (secondaryTarget > secondaryCoord[indexes.get(1)]){
-                return indexes.get(1);
-            }else{
-                return indexes.get(0);
-            }
-        }
-
-    }
-
-    public static int maxCoord(int[] arr) {
-
-        PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
-        for (int num : arr) {
-            maxHeap.add(num);
-        }
-            return maxHeap.peek();
-    }
-        
-    public static int minCoord(int[] arr) {
-        
-        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
-        for (int num : arr) {
-            minHeap.add(num);
-        }
-            return minHeap.peek();
     }
 
     private void echoForward(){
@@ -344,44 +320,64 @@ public class AreaScan {
         this.taskQueue.add(decision.put("action", "echo").toString());
     }
 
+    private void echoLeft(){
+        parameter.put("direction", droneDirection.turn_left().toString());
+        decision.put("parameters", parameter);
+        this.taskQueue.add(decision.put("action", "echo").toString());
+    }
+
+    private void echoRight(){
+        parameter.put("direction", droneDirection.turn_right().toString());
+        decision.put("parameters", parameter);
+        this.taskQueue.add(decision.put("action", "echo").toString());
+    }
+
     private void turnLeft(){
+
+        dronePosition.updatePosition("TURN_LEFT",droneDirection);
+
         parameter.put("direction", droneDirection.turn_left().toString());
         decision.put("parameters", parameter).toString();
         taskQueue.add(decision.put("action", "heading").toString());
 
         droneDirection = droneDirection.turn_left();
-        dronePosition.updatePosition("TURN_LEFT",droneDirection);
+
     }
 
     private void turnRight(){
+
+        logger.info("I WANT TO DIE");
+        dronePosition.updatePosition("TURN_RIGHT",droneDirection);
+
         parameter.put("direction", droneDirection.turn_right().toString());
         decision.put("parameters", parameter).toString();
         taskQueue.add(decision.put("action", "heading").toString());
 
         droneDirection = droneDirection.turn_right();
-        dronePosition.updatePosition("TURN_RIGHT",droneDirection);
         
     }
 
     private void linearScan(){
         this.taskQueue.add(decision.put("action","fly").toString());
         dronePosition.updatePosition("FLY",droneDirection);
-        if (range == 0){
-            this.taskQueue.add(decision.put("action","scan").toString());
-        } else {
-            range--;
-        }
+        this.taskQueue.add(decision.put("action","scan").toString());
+
+    }
+
+    private void fly(){
+        this.taskQueue.add(decision.put("action","fly").toString());
+        dronePosition.updatePosition("FLY",droneDirection);
     }
 
     private void turnBack(boolean turningRight){
-        this.taskQueue.add(decision.put("action","fly").toString());
-        dronePosition.updatePosition("FLY",droneDirection);
+
+        logger.info("TURNYOUPIECEOFACTUAL");
+        fly();
 
         if (turningRight == true){
             turnRight();
 
-            this.taskQueue.add(decision.put("action","fly").toString());
-            dronePosition.updatePosition("FLY",droneDirection);
+            fly();
 
             turnLeft();
             turnLeft();
@@ -391,8 +387,7 @@ public class AreaScan {
         } else{
             turnLeft();
 
-            this.taskQueue.add(decision.put("action","fly").toString());
-            dronePosition.updatePosition("FLY",droneDirection);
+            fly();
 
             turnRight();
             turnRight();
