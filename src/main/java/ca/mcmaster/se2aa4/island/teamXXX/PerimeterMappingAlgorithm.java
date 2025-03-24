@@ -211,7 +211,7 @@ public class PerimeterMappingAlgorithm implements DroneEchoAnalyzer, NavigationI
 
         } else {
 
-            edgePositions[3] = locationToMark[0];
+            edgePositions[3] = locationToMark[1];
 
             currentPosition[0] -= 1;
             currentPosition[1] -= 1;

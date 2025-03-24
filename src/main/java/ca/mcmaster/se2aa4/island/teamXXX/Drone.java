@@ -32,7 +32,6 @@ public class Drone {
         JSONObject decision = new JSONObject();
  
         if (phase == 0) {
-
             decision = islandFinder.findNextStep();
             logger.info("Island Finder direction: {}",islandFinder.getDirection().toString());
 
