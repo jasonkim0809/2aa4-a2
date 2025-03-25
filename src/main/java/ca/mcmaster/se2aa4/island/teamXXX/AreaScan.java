@@ -267,7 +267,7 @@ public class AreaScan {
         }
 
         if(lengthOfIsland == scannedLanes){
-            this.taskQueue.add(decision.put("action", "stop").toString());
+            // this.taskQueue.add(decision.put("action", "stop").toString());
             finished = true;
             logger.info("Found Closest Creek{}",closestCreek());
         }

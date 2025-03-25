@@ -42,6 +42,8 @@ public class Drone {
                 perimeterDimensions = new PerimeterDimensions(perimeterMapping.perimeterValues()[0], perimeterMapping.perimeterValues()[1], perimeterMapping.perimeterValues()[2], perimeterMapping.perimeterValues()[3]);
                 areaScanner = new AreaScan(perimeterMapping.getDirection(),perimeterDimensions);
                 phase++;
+                decision.put("action","scan");
+                return decision;
             } else if (phase == 3){
                 String areaScanDecision = areaScanner.findNextStep();
                 decision = new JSONObject(areaScanDecision);
