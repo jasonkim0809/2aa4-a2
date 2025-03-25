@@ -1,15 +1,12 @@
 package ca.mcmaster.se2aa4.island.teamXXX;
 import java.io.StringReader;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 public class Drone {
-    private final Logger logger = LogManager.getLogger();
 
     private int battery_level;
     private Directions direction;
@@ -20,6 +17,9 @@ public class Drone {
     private PerimeterMappingAlgorithm perimeterMapping;
     private PerimeterDimensions perimeterDimensions;
 
+    public String getClosest(){
+        return areaScanner.closest;
+    }
     private AreaScan areaScanner;
     
         public Drone(String s){
@@ -45,7 +45,6 @@ public class Drone {
                 decision.put("action","scan");
                 return decision;
             } else if (phase == 3){
-                logger.info("PHASE 3");
                 String areaScanDecision = areaScanner.findNextStep();
                 decision = new JSONObject(areaScanDecision);
             }

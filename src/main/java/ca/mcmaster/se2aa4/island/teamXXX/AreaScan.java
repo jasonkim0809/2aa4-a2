@@ -3,15 +3,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 public class AreaScan {
-    private final Logger logger = LogManager.getLogger();
     private Directions droneDirection;
     private DronePosition dronePosition;
 
@@ -39,6 +36,7 @@ public class AreaScan {
     private int lengthOfIsland;
 
     private String creeksFound, sitesFound, biomesFound;
+    String closest = "";
     private int range = 0, scannedLanes = 0;
     double smallestToSite;
 
@@ -56,7 +54,6 @@ public class AreaScan {
 
         String init_heading = s;
         this.droneDirection = Directions.fromString(init_heading);
-        logger.info("Initial heading: {}",droneDirection.toString());
 
         this.perimeterEdgePositions[0] = p.perimeterEdgePositions[0]+1;
         this.perimeterEdgePositions[1] = p.perimeterEdgePositions[1];
@@ -96,9 +93,6 @@ public class AreaScan {
             if(distanceToSite < smallestToSite && creekID != null){
                 smallestToSite = distanceToSite;
                 closestCreekID = creekID;
-                logger.info("smallestToSite{}",smallestToSite);
-                logger.info("closestCreekID{}",closestCreekID);
-                logger.info("creekID{}",creekID);
             }
         }
         return closestCreekID;
@@ -269,7 +263,7 @@ public class AreaScan {
         if(lengthOfIsland == scannedLanes){
             // this.taskQueue.add(decision.put("action", "stop").toString());
             finished = true;
-            logger.info("Found Closest Creek{}",closestCreek());
+            closest = closestCreek();
         }
 
         creeksFound = "";

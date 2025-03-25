@@ -10,7 +10,6 @@ import ca.mcmaster.se2aa4.island.teamXXX.enums.Directions;
 
 
 public class IslandFinder implements NavigationInterface{
-    private final Logger logger = LogManager.getLogger();
     private Directions direction;
 
     private Directions echoDirection; // represents which direction to scan in right now, goes left, forward, right
@@ -30,7 +29,6 @@ public class IslandFinder implements NavigationInterface{
         JSONObject info = new JSONObject(new JSONTokener(new StringReader(s)));
         String init_heading = info.getString("heading");
         direction = Directions.fromString(init_heading);
-        logger.info("Initial heading: {}",direction.toString());
 
         this.echoDirection = direction.turn_left();
     }
