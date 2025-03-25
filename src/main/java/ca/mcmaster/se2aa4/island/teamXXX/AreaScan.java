@@ -58,10 +58,10 @@ public class AreaScan {
         this.droneDirection = Directions.fromString(init_heading);
         logger.info("Initial heading: {}",droneDirection.toString());
 
-        this.perimeterEdgePositions[0] = p.perimeterEdgePositions[0];
+        this.perimeterEdgePositions[0] = p.perimeterEdgePositions[0]+1;
         this.perimeterEdgePositions[1] = p.perimeterEdgePositions[1];
         this.perimeterEdgePositions[2] = p.perimeterEdgePositions[2];
-        this.perimeterEdgePositions[3] = p.perimeterEdgePositions[3];
+        this.perimeterEdgePositions[3] = p.perimeterEdgePositions[3]-1;
 
         switch(droneDirection){
             case N,S:
@@ -128,7 +128,7 @@ public class AreaScan {
 
         if ( onOcean == false ){
             linearScan();
-            if(dronePosition.getDroneY() > perimeterEdgePositions[3]+1 && dronePosition.getDroneY() < perimeterEdgePositions[1]-1 && dronePosition.getDroneX() > perimeterEdgePositions[2]+1 && dronePosition.getDroneX() < perimeterEdgePositions[0]-1){
+            if(dronePosition.getDroneY() > perimeterEdgePositions[3]+1 && dronePosition.getDroneY() < perimeterEdgePositions[0]-1 && dronePosition.getDroneX() > perimeterEdgePositions[2]+1 && dronePosition.getDroneX() < perimeterEdgePositions[1]-1){
                 onWayBack = false;
             }
         } else if (outOfBounds == false){
