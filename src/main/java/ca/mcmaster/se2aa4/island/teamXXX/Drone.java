@@ -45,6 +45,7 @@ public class Drone {
                 decision.put("action","scan");
                 return decision;
             } else if (phase == 3){
+                logger.info("PHASE 3");
                 String areaScanDecision = areaScanner.findNextStep();
                 decision = new JSONObject(areaScanDecision);
             }
