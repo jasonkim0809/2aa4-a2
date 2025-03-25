@@ -27,7 +27,6 @@ public class AreaScan {
 
     //gets perimeter values from Drone, which somehow gets them from CreekFind
     //Runs through a minmax heap to get max min vals for x y
-    private ArrayList<Integer> checked = new ArrayList<>(); 
     private Integer[] perimeterEdgePositions = {36,14,-10,0};
 
     JSONObject decision = new JSONObject();
@@ -46,7 +45,9 @@ public class AreaScan {
 
     private String creeksFound, sitesFound, biomesFound;
     private int range = 0, scannedLanes = 0;
-    double smallestToSite = 0;
+    double smallestToSite;
+
+    String closestCreekID;
 
     public AreaScan(/*Directions droneDirection,*/ String s){ // starts off facing where it originaly started
         //this.droneDirection = droneDirection;
@@ -66,6 +67,8 @@ public class AreaScan {
                 lengthOfIsland = Math.abs(perimeterEdgePositions[0]) + Math.abs(perimeterEdgePositions[3]);
         }
 
+        smallestToSite = lengthOfIsland;
+
         if (dronePosition.getDroneX() == perimeterEdgePositions[1] || dronePosition.getDroneX() == perimeterEdgePositions[2] || dronePosition.getDroneY() == perimeterEdgePositions[0] || dronePosition.getDroneY() == perimeterEdgePositions[3]){
             if (turningRight == true){
                 turningRight = false;
@@ -76,21 +79,26 @@ public class AreaScan {
 
     }
 
-    public boolean isFinished(){ //goes to next phase
+    public String closestCreek(){ //goes to next phase
         for (int i = 0; i < creeks.size()-1; i++){
 
             int creekX = creeks.get(i).getX();
             int creekY = creeks.get(i).getY();
             int siteX = sites.get(0).getX();
             int siteY = sites.get(0).getY();
+            String creekID = creeks.get(i).getID();
 
             double distanceToSite = Math.sqrt(Math.pow((creekY-siteY),2)+Math.pow((creekX-siteX),2));
 
-            if(distanceToSite < smallestToSite){
+            if(distanceToSite < smallestToSite && creekID != null){
                 smallestToSite = distanceToSite;
+                closestCreekID = creekID;
+                logger.info("smallestToSite{}",smallestToSite);
+                logger.info("closestCreekID{}",closestCreekID);
+                logger.info("creekID{}",creekID);
             }
         }
-        return this.finished;
+        return closestCreekID;
     }
 
     public class ScanResults {
@@ -257,7 +265,7 @@ public class AreaScan {
 
         if(lengthOfIsland == scannedLanes){
             this.taskQueue.add(decision.put("action", "stop").toString());
-            isFinished();
+            logger.info("Found Closest Creek{}",closestCreek());
         }
 
         creeksFound = "";
@@ -291,12 +299,12 @@ public class AreaScan {
             }
         }
 
-        if (!sitesFound.equals("")){
+        if (!sitesFound.equals("[]") && sitesFound != null && !sitesFound.equals("")){
             sites.add(new PointOfInterest(dronePosition.getDroneX(),dronePosition.getDroneY(),sitesFound));
         }
 
-        if (!creeksFound.equals("")){
-            creeks.add(new PointOfInterest(dronePosition.getDroneX(),dronePosition.getDroneY(),sitesFound));
+        if (!creeksFound.equals("[]") && creeksFound != null && !creeksFound.equals("")){
+            creeks.add(new PointOfInterest(dronePosition.getDroneX(),dronePosition.getDroneY(),creeksFound));
         }
 
     }
