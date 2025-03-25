@@ -2,16 +2,13 @@ package ca.mcmaster.se2aa4.island.teamXXX.droneAnalyzers;
 
 import org.json.JSONObject;
 
-import ca.mcmaster.se2aa4.island.teamXXX.enums.Biome;
 import ca.mcmaster.se2aa4.island.teamXXX.locationClasses.Creek;
 import ca.mcmaster.se2aa4.island.teamXXX.locationClasses.EmergencySite;
 
 public interface DroneScanAnalyzer extends DroneAnalyzer{
 
-    public Boolean findBiomeInScan(Biome biome);
     public EmergencySite parseSitesInExtrasResult(JSONObject extrasResult);
     public Creek parseCreekInExtrasResult(JSONObject extrasResult);
-    public Biome[] parseBiomesInExtrasResult(JSONObject extrasResult);
     public JSONObject parseExtrasInResults(JSONObject scannedResult);
 
 }
